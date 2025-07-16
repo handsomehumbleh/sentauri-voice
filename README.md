@@ -1,189 +1,300 @@
-# Sentauri Backend - Production Deployment Guide
+# Sentauri Voice - AI Assistant Demo
 
-## 🚀 Quick Start
+🎤 **Transform websites with voice commands using AI**
 
-### Local Development
+[![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/handsomehumbleh/sentauri-voice)
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/handsomehumbleh/sentauri-voice)
+
+## 🌟 Features
+
+- **Voice-Controlled Website Editing** - Modify websites in real-time using natural language
+- **AI-Powered Responses** - Sentauri responds with context-aware voice feedback
+- **Real-Time Animations** - Voice-responsive avatar with frequency visualization
+- **ElevenLabs Integration** - High-quality text-to-speech voices
+- **Browser Fallback** - Works even without ElevenLabs API key
+- **Analytics Ready** - Google Analytics 4 integration for tracking
+
+## 🚀 Quick Start - Demo
+
+### Option 1: Run Demo Locally (No Backend Required)
+
+```bash
+# Clone the repository
+git clone https://github.com/handsomehumbleh/sentauri-voice.git
+cd sentauri-voice
+
+# Run the demo (choose one)
+npm run demo          # Uses Python
+npm run demo:node     # Uses Node.js/npx serve
+
+# Open http://localhost:8080/demo.html
+```
+
+### Option 2: Full Stack with ElevenLabs
+
 ```bash
 # Install dependencies
 npm install
 
-# Set up environment variables
-cp .env.example .env
-# Edit .env and add your ELEVENLABS_API_KEY
+# Create .env file
+echo "ELEVENLABS_API_KEY=your_api_key_here" > .env
 
-# Run development server
+# Run the backend
 npm run dev
+
+# In another terminal, run the demo
+npm run demo
+
+# Backend: http://localhost:3000
+# Demo: http://localhost:8080/demo.html
 ```
 
-### Production Deployment
+## 🎯 Voice Commands
 
-#### Option 1: Node.js Server (VPS, EC2, etc.)
-```bash
-# Clone repository
-git clone <your-repo>
-cd sentauri-backend
+Try these commands in the demo:
 
-# Install production dependencies
-npm ci --only=production
+- **"Change the title to [your text]"** - Updates the main heading
+- **"Make the background [blue/green/red/yellow/dark]"** - Changes background color
+- **"Change the subtitle to [your text]"** - Updates the tagline
+- **"Change button color to [green/red/purple]"** - Modifies CTA button
+- **"Change button text to [your text]"** - Updates button label
+- **"Add a new feature"** - Adds a feature card
+- **"Remove a feature"** - Removes the last feature
+- **"Animate the page"** - Triggers animations
+- **"Hello"** or **"Help"** - Get assistance
 
-# Set environment variables
-export ELEVENLABS_API_KEY=your_api_key_here
-export NODE_ENV=production
-export PORT=3000
+## 📁 Project Structure
 
-# Start server (use PM2 for production)
-npm install -g pm2
-pm2 start server.js --name sentauri-backend
-pm2 save
-pm2 startup
+```
+sentauri-voice/
+├── demo.html          # Main demo interface
+├── demo.js           # Voice interaction logic
+├── config.js         # Configuration settings
+├── server.js         # Backend API server
+├── package.json      # Dependencies and scripts
+├── .env.example      # Environment template
+└── README.md         # This file
 ```
 
-#### Option 2: Docker
-```bash
-# Build image
-docker build -t sentauri-backend .
+## 🔧 Configuration
 
-# Run container
-docker run -d \
-  -p 3000:3000 \
-  -e ELEVENLABS_API_KEY=your_api_key_here \
-  -e NODE_ENV=production \
-  --name sentauri \
-  sentauri-backend
+### Frontend Configuration (config.js)
+
+```javascript
+const config = {
+    API_URL: 'http://localhost:3000',     // Your backend URL
+    VOICE_ID: 'qSV5UqvHBC0Widy71Esh',   // ElevenLabs voice
+    GA_ID: 'G-XXXXXXXXXX',               // Google Analytics ID
+    FEATURES: {
+        useElevenLabs: true,             // Use ElevenLabs TTS
+        enableAnalytics: true,           // Track events
+        enableVoiceVisualization: true   // Show voice waveform
+    }
+};
 ```
 
-#### Option 3: Vercel Deployment
-1. Install Vercel CLI: `npm i -g vercel`
-2. Run `vercel` in the project directory
-3. Set environment variables in Vercel dashboard
+### Backend Environment (.env)
 
-#### Option 4: Railway/Render/Fly.io
-These platforms auto-detect Node.js apps:
-1. Connect your GitHub repo
-2. Set environment variables in dashboard
-3. Deploy automatically
-
-## 🔒 Security Checklist
-
-### Required Environment Variables
 ```env
-ELEVENLABS_API_KEY=sk_your_actual_key_here
+ELEVENLABS_API_KEY=your_api_key_here
 NODE_ENV=production
 PORT=3000
 ```
 
-### NGINX Configuration (if using reverse proxy)
-```nginx
-server {
-    listen 80;
-    server_name sentauri.ai www.sentauri.ai;
-    return 301 https://$server_name$request_uri;
-}
+## 🌐 Deployment
 
-server {
-    listen 443 ssl http2;
-    server_name sentauri.ai www.sentauri.ai;
+### Deploy Demo Only (Static Sites)
 
-    ssl_certificate /path/to/ssl/cert.pem;
-    ssl_certificate_key /path/to/ssl/key.pem;
+#### Vercel
+```bash
+# Install Vercel CLI
+npm i -g vercel
 
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
+# Deploy
+vercel --prod
+
+# Set root directory to: .
+# Set build command to: (leave empty)
+# Set output directory to: .
 ```
 
-## 📊 Monitoring
+#### Netlify
+1. Drag and drop the project folder to Netlify
+2. Or use Git deployment with these settings:
+   - Build command: (leave empty)
+   - Publish directory: .
+   - Site will be available at: your-site.netlify.app/demo.html
 
-### Health Check
+#### GitHub Pages
+1. Go to Settings → Pages
+2. Source: Deploy from branch
+3. Branch: main, folder: / (root)
+4. Access at: username.github.io/sentauri-voice/demo.html
+
+### Deploy Full Stack (Backend + Demo)
+
+#### Railway/Render
+1. Connect GitHub repository
+2. Set environment variables:
+   ```
+   ELEVENLABS_API_KEY=your_key
+   NODE_ENV=production
+   ```
+3. Deploy automatically
+
+#### Heroku
 ```bash
-curl https://sentauri.ai/api/health
+heroku create sentauri-voice
+heroku config:set ELEVENLABS_API_KEY=your_key
+git push heroku main
 ```
 
-### Logging with PM2
-```bash
-pm2 logs sentauri-backend
-pm2 monit
+## 📊 Analytics Setup
+
+1. Create a Google Analytics 4 property
+2. Get your Measurement ID (G-XXXXXXXXXX)
+3. Update `config.js`:
+   ```javascript
+   GA_ID: 'G-YOUR-ACTUAL-ID'
+   ```
+
+### Tracked Events
+- `demo_started` - User begins voice interaction
+- `voice_command` - Each command spoken
+- `command_success` - Successful execution
+- `test_voice_clicked` - Voice test button
+- `speech_error` - Recognition errors
+
+## 🔒 Security
+
+### CORS Configuration
+The backend includes CORS headers for:
+- Local development (localhost:8080, 8000)
+- Production domains (sentauri.ai)
+- Common deployment platforms
+
+To add your domain:
+```javascript
+// In server.js
+const allowedOrigins = [
+    'https://your-domain.com',
+    // ... other origins
+];
 ```
 
 ### Rate Limiting
-- API: 100 requests per 15 minutes per IP
-- TTS: 10 requests per minute per IP
+- API: 100 requests per 15 minutes
+- TTS: 10 requests per minute
 
-## 🎯 API Endpoints
+## 🧪 Browser Support
 
-### Text-to-Speech
-```bash
-POST /api/text-to-speech
-Content-Type: application/json
+| Feature | Chrome | Edge | Safari | Firefox |
+|---------|--------|------|--------|---------|
+| Speech Recognition | ✅ | ✅ | ⚠️ | ⚠️ |
+| ElevenLabs TTS | ✅ | ✅ | ✅ | ✅ |
+| Browser TTS | ✅ | ✅ | ✅ | ✅ |
+| Voice Visualization | ✅ | ✅ | ✅ | ✅ |
 
-{
-  "text": "Hello, I'm Sentauri",
-  "voiceId": "qSV5UqvHBC0Widy71Esh"
+⚠️ = Limited support, fallbacks available
+
+## 🛠️ Development
+
+### Adding New Commands
+
+1. Edit `demo.js` in the `processCommand()` function:
+```javascript
+else if (lowerCommand.includes('your_command')) {
+    performAction();
+    responseText = "Action completed!";
+    actionTaken = true;
 }
-
-Response: audio/mpeg stream
 ```
 
-### Health Check
-```bash
-GET /api/health
-
-Response:
-{
-  "status": "ok",
-  "service": "sentauri-backend",
-  "timestamp": "2024-01-15T10:30:00Z"
+2. Add the action function:
+```javascript
+function performAction() {
+    // Your code here
+    document.getElementById('element').style.property = 'value';
 }
+```
+
+### Customizing the Avatar
+
+Modify CSS in `demo.html`:
+```css
+.assistant-avatar {
+    background: linear-gradient(135deg, #your-color-1, #your-color-2);
+    /* Adjust size, animations, etc. */
+}
+```
+
+### Using Different Voices
+
+Get voice IDs from [ElevenLabs](https://elevenlabs.io/voice-library):
+```javascript
+// In config.js
+VOICE_ID: 'different_voice_id_here'
 ```
 
 ## 🐛 Troubleshooting
 
+### "Speech recognition not supported"
+- Use Chrome or Edge for best results
+- Ensure microphone permissions are granted
+- Check HTTPS connection (required for speech API)
+
 ### "Voice service not configured"
-- Check ELEVENLABS_API_KEY is set correctly
-- Verify API key is active on ElevenLabs dashboard
+- Add your ElevenLabs API key to `.env`
+- Restart the backend server
+- Check API key validity
 
-### CORS errors
-- Update ALLOWED_ORIGINS in server.js for your domain
-- Ensure HTTPS is configured
+### CORS Errors
+- Ensure backend is running
+- Check `API_URL` in `config.js`
+- Verify your domain is in `allowedOrigins`
 
-### High latency
-- Consider caching frequently used phrases
-- Use CDN for static assets
-- Upgrade ElevenLabs plan for priority processing
+### No Audio Output
+- Check browser audio permissions
+- Verify ElevenLabs API quota
+- Test with browser TTS (set `useElevenLabs: false`)
 
-## 📈 Scaling
+## 📈 Performance Tips
 
-### Horizontal Scaling with PM2
-```bash
-pm2 scale sentauri-backend 4  # Run 4 instances
-```
+1. **Optimize API Calls**
+   - Cache common phrases
+   - Implement request debouncing
+   - Use browser TTS for non-critical responses
 
-### Redis for Rate Limiting (optional)
-```javascript
-// Add to server.js
-import RedisStore from 'rate-limit-redis';
-import Redis from 'redis';
+2. **Improve Load Time**
+   - Minify JS/CSS for production
+   - Use CDN for static assets
+   - Enable gzip compression
 
-const redisClient = Redis.createClient({
-  url: process.env.REDIS_URL
-});
+3. **Scale Backend**
+   - Use PM2 for process management
+   - Implement Redis for rate limiting
+   - Deploy behind a load balancer
 
-const limiter = rateLimit({
-  store: new RedisStore({
-    client: redisClient
-  }),
-  // ... rest of config
-});
-```
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## 📝 License
-MIT
+
+MIT License - see [LICENSE](LICENSE) file for details
+
+## 🙏 Acknowledgments
+
+- [ElevenLabs](https://elevenlabs.io) for voice synthesis
+- [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API) for recognition
+- [Claude](https://claude.ai) for AI assistance
+
+---
+
+Built with ❤️ by the Sentauri Team
+
+**Need help?** Open an issue or reach out at hello@sentauri.ai
