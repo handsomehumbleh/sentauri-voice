@@ -20,20 +20,44 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://www.googletagmanager.com"],
             styleSrc: ["'self'", "'unsafe-inline'"],
             imgSrc: ["'self'", "data:", "https:"],
-            connectSrc: ["'self'", "https://api.elevenlabs.io"],
+            connectSrc: ["'self'", "https://api.elevenlabs.io", "https://www.google-analytics.com"],
             mediaSrc: ["'self'", "blob:"],
         },
     },
 }));
 
-// CORS configuration
+// CORS configuration - Updated to support demo URLs
+const allowedOrigins = process.env.NODE_ENV === 'production' 
+    ? [
+        'https://sentauri.ai',
+        'https://www.sentauri.ai',
+        'https://demo.sentauri.ai',
+        'https://sentauri-voice.vercel.app',
+        'https://sentauri-voice.netlify.app'
+      ]
+    : [
+        'http://localhost:3000',
+        'http://localhost:8080',
+        'http://localhost:8000',
+        'http://127.0.0.1:8080',
+        'http://127.0.0.1:8000'
+      ];
+
 const corsOptions = {
-    origin: process.env.NODE_ENV === 'production' 
-        ? ['https://sentauri.ai', 'https://www.sentauri.ai']
-        : ['http://localhost:3000', 'http://localhost:8080'],
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            console.log('CORS blocked origin:', origin);
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
     optionsSuccessStatus: 200
 };
@@ -60,20 +84,17 @@ const ttsLimiter = rateLimit({
 app.use('/api/', apiLimiter);
 app.use('/api/text-to-speech', ttsLimiter);
 
-// Serve static files
-app.use(express.static(join(__dirname, 'public')));
-
-// Serve demo page at /demo route
-app.get('/demo', (req, res) => {
-    res.sendFile(join(__dirname, 'public', 'demo.html'));
-});
+// Serve static files including demo
+app.use(express.static(__dirname));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
     res.json({ 
         status: 'ok', 
         service: 'sentauri-backend',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        cors_enabled: true,
+        demo_ready: true
     });
 });
 
@@ -186,8 +207,9 @@ app.listen(PORT, () => {
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🌐 Port: ${PORT}
 🔒 Environment: ${process.env.NODE_ENV || 'development'}
-📡 CORS: ${corsOptions.origin}
+📡 CORS Origins: ${allowedOrigins.join(', ')}
 🔑 API Key: ${process.env.ELEVENLABS_API_KEY ? '✓ Configured' : '✗ Missing'}
+🎯 Demo URL: http://localhost:${PORT}/demo.html
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     `);
 });
