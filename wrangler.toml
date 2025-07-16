@@ -1,0 +1,13 @@
+name = "sentauri-backend"
+compatibility_date = "2024-01-15"
+compatibility_flags = ["nodejs_compat"]
+
+[env.production]
+# Domain will be set in Cloudflare dashboard
+# custom_domains = ["sentauri.ai", "www.sentauri.ai"]
+
+# Environment variables (set in Cloudflare dashboard)
+# ELEVENLABS_API_KEY = "sk_your_api_key"
+
+# Pages configuration
+pages_build_output_dir = "public"

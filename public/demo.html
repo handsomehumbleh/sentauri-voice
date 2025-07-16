@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentauri - AI Voice Assistant | Edit Websites with Natural Language</title>
+    <meta name="description" content="Sentauri lets you edit websites using voice commands. Powered by AI for instant website modifications. Try our live demo!">
+    
+    <!-- Open Graph / Social Media Tags -->
+    <meta property="og:title" content="Sentauri - Voice-Controlled Website Editor">
+    <meta property="og:description" content="Edit websites instantly with voice commands. Powered by AI.">
+    <meta property="og:image" content="/og-image.png">
+    <meta property="og:url" content="https://sentauri.ai">
+    <meta property="og:type" content="website">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Sentauri - AI Website Editor">
+    <meta name="twitter:description" content="Edit websites with voice commands. See it in action!">
+    <meta name="twitter:image" content="/twitter-card.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/favicon.png">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0e1a;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            background: rgba(10, 14, 26, 0.9);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4a9eff;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #4a9eff;
+        }
+
+        .demo-button {
+            background: #54c969;
+            color: #ffffff;
+            padding: 10px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .demo-button:hover {
+            background: #42a756;
+            transform: translateY(-2px);
+        }
+
+        /* Main Content */
+        .main-container {
+            display: flex;
+            height: 100vh;
+            margin-top: 70px;
+        }
+
+        /* Assistant Panel */
+        .assistant-panel {
+            width: 40%;
+            background: linear-gradient(135deg, #1a1f35 0%, #0f1422 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .assistant-panel::before {
+            content: '';
+            position: absolute;
+            width: 300%;
+            height: 300%;
+            background: radial-gradient(circle, rgba(74, 158, 255, 0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+
+        .assistant-avatar {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #e8f0ff 0%, #d4e3ff 100%);
+            border-radius: 50%;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 20px 60px rgba(74, 158, 255, 0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .eyes {
+            display: flex;
+            gap: 40px;
+        }
+
+        .eye {
+            width: 12px;
+            height: 24px;
+            background: #4a9eff;
+            border-radius: 50%;
+            position: relative;
+            animation: blink 4s infinite;
+        }
+
+        @keyframes blink {
+            0%, 90%, 100% { transform: scaleY(1); }
+            95% { transform: scaleY(0.1); }
+        }
+
+        /* Voice-responsive animations */
+        .assistant-avatar.speaking {
+            animation: float 0.5s ease-in-out infinite, glow 0.3s ease-in-out infinite;
+        }
+
+        .assistant-avatar.ai-speaking {
+            animation: float 0.3s ease-in-out infinite, ai-glow 0.5s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 20px 60px rgba(74, 158, 255, 0.3); }
+            50% { box-shadow: 0 25px 80px rgba(74, 158, 255, 0.6); }
+        }
+
+        @keyframes ai-glow {
+            0%, 100% { box-shadow: 0 20px 60px rgba(138, 92, 246, 0.4); }
+            50% { box-shadow: 0 25px 80px rgba(138, 92, 246, 0.7); }
+        }
+
+        .eye.speaking {
+            animation: none;
+            height: 30px;
+            transition: all 0.1s;
+        }
+
+        .eye.ai-speaking {
+            background: #8b5cf6;
+            animation: ai-blink 0.2s ease-in-out infinite;
+        }
+
+        @keyframes ai-blink {
+            0%, 100% { transform: scaleX(1); }
+            50% { transform: scaleX(1.5); }
+        }
+
+        /* Mouth animation for AI speaking */
+        .mouth {
+            position: absolute;
+            bottom: 60px;
+            width: 40px;
+            height: 10px;
+            background: #4a9eff;
+            border-radius: 0 0 20px 20px;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .mouth.active {
+            opacity: 1;
+            animation: talk 0.3s ease-in-out infinite;
+        }
+
+        @keyframes talk {
+            0%, 100% { height: 10px; border-radius: 0 0 20px 20px; }
+            50% { height: 20px; border-radius: 20px; }
+        }
+
+        .voice-ripple {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border: 2px solid rgba(74, 158, 255, 0.4);
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .voice-ripple.active {
+            animation: ripple 1.5s ease-out;
+        }
+
+        .voice-ripple.ai-active {
+            border-color: rgba(138, 92, 246, 0.4);
+            animation: ripple 1.5s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0.8);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        .listening-indicator {
+            position: absolute;
+            bottom: -30px;
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .listening-indicator.active {
+            opacity: 1;
+        }
+
+        .sound-bar {
+            width: 4px;
+            height: 20px;
+            background: #4a9eff;
+            border-radius: 2px;
+            animation: soundWave 0.5s ease-in-out infinite;
+        }
+
+        .sound-bar:nth-child(2) { animation-delay: 0.1s; }
+        .sound-bar:nth-child(3) { animation-delay: 0.2s; }
+        .sound-bar:nth-child(4) { animation-delay: 0.3s; }
+        .sound-bar:nth-child(5) { animation-delay: 0.4s; }
+
+        @keyframes soundWave {
+            0%, 100% { height: 20px; }
+            50% { height: 40px; }
+        }
+
+        .assistant-text {
+            margin-top: 60px;
+            text-align: center;
+            z-index: 1;
+            position: relative;
+        }
+
+        .assistant-text h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+
+        .assistant-text p {
+            color: #8b92a9;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* Input Controls */
+        .input-controls {
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 400px;
+            z-index: 1;
+        }
+
+        .voice-button {
+            background: #4a9eff;
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            z-index: 1;
+        }
+
+        .voice-button:hover {
+            background: #3589e8;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(74, 158, 255, 0.4);
+        }
+
+        .voice-button.listening {
+            background: #ff4a4a;
+        }
+
+        /* Voice Settings */
+        .voice-settings {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .voice-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .voice-select {
+            width: 100%;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(74, 158, 255, 0.3);
+            border-radius: 5px;
+            color: white;
+            margin-top: 10px;
+        }
+
+        .voice-select option {
+            background: #1a1f35;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #4a9eff;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .command-history {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            right: 40px;
+            max-height: 150px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .command-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(74, 158, 255, 0.1);
+            border-radius: 5px;
+            font-size: 14px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .command-item.ai-response {
+            background: rgba(138, 92, 246, 0.1);
+            border-left: 3px solid #8b5cf6;
+        }
+
+        .command-item.error {
+            background: rgba(255, 74, 74, 0.1);
+            border-left: 3px solid #ff4a4a;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Preview Panel */
+        .preview-panel {
+            width: 60%;
+            background: #ffffff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-header {
+            background: #f5f5f5;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .browser-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .browser-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ddd;
+        }
+
+        .browser-dot:nth-child(1) { background: #ff5f57; }
+        .browser-dot:nth-child(2) { background: #ffbd2e; }
+        .browser-dot:nth-child(3) { background: #28ca42; }
+
+        .url-bar {
+            flex: 1;
+            background: #ffffff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .preview-content {
+            height: calc(100% - 60px);
+            overflow-y: auto;
+            padding: 40px;
+            color: #333;
+        }
+
+        /* Demo Website Styles */
+        .demo-site {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .demo-header h1 {
+            font-size: 48px;
+            color: #333;
+            margin-bottom: 20px;
+            transition: all 0.5s;
+        }
+
+        .demo-header p {
+            font-size: 20px;
+            color: #666;
+            transition: all 0.5s;
+        }
+
+        .demo-features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.5s;
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .cta-section {
+            text-align: center;
+            margin-top: 60px;
+            padding: 40px;
+            background: #4a9eff;
+            border-radius: 10px;
+            color: white;
+            transition: all 0.5s;
+        }
+
+        .cta-button {
+            background: white;
+            color: #4a9eff;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Highlight Animation */
+        @keyframes highlight {
+            0% { background: #ffeb3b; }
+            100% { background: transparent; }
+        }
+
+        .highlight {
+            animation: highlight 2s ease-out;
+        }
+
+        /* Loading indicator */
+        .loading-indicator {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(138, 92, 246, 0.3);
+            border-top-color: #8b5cf6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-indicator.active {
+            display: block;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .assistant-panel, .preview-panel {
+                width: 100%;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">🤖 Sentauri</div>
+        <div class="nav-links">
+            <a href="#how">How It Works</a>
+            <a href="#features">Features</a>
+            <a href="#demo">Live Demo</a>
+            <a href="#" class="demo-button">Get Early Access</a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Assistant Panel -->
+        <div class="assistant-panel">
+            <div class="assistant-avatar" id="assistantAvatar">
+                <div class="eyes">
+                    <div class="eye" id="leftEye"></div>
+                    <div class="eye" id="rightEye"></div>
+                </div>
+                <div class="mouth" id="mouth"></div>
+                <div class="listening-indicator" id="listeningIndicator">
+                    <div class="sound-bar" id="bar1"></div>
+                    <div class="sound-bar" id="bar2"></div>
+                    <div class="sound-bar" id="bar3"></div>
+                    <div class="sound-bar" id="bar4"></div>
+                    <div class="sound-bar" id="bar5"></div>
+                </div>
+                <div class="voice-ripple" id="voiceRipple1"></div>
+                <div class="voice-ripple" id="voiceRipple2"></div>
+                <div class="loading-indicator" id="loadingIndicator"></div>
+            </div>
+            
+            <div class="assistant-text">
+                <h2>Hi, I'm Sentauri</h2>
+                <p>Click the button and tell me how to modify the website</p>
+                <p style="font-size: 14px; margin-top: 10px; color: #54c969;">
+                    Try: "Change the title to..." or "Make the background blue"
+                </p>
+            </div>
+
+            <div class="input-controls">
+                <button class="voice-button" id="voiceButton" onclick="toggleListening()">
+                    🎤 Start Voice Command
+                </button>
+                
+                <div class="voice-settings">
+                    <div class="voice-toggle">
+                        <span>AI Voice Responses</span>
+                        <label class="switch">
+                            <input type="checkbox" id="voiceResponseToggle" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <select class="voice-select" id="voiceSelect">
+                        <option value="Sentauri">Sentauri (Default)</option>
+                        <option value="Rachel">Rachel</option>
+                        <option value="Domi">Domi</option>
+                        <option value="Bella">Bella</option>
+                        <option value="Antoni">Antoni</option>
+                        <option value="Elli">Elli</option>
+                        <option value="Josh">Josh</option>
+                        <option value="Arnold">Arnold</option>
+                        <option value="Adam">Adam</option>
+                        <option value="Sam">Sam</option>
+                    </select>
+                    <div style="color: #8b92a9; font-size: 12px; margin-top: 5px;">
+                        Powered by ElevenLabs AI voices
+                    </div>
+                </div>
+            </div>
+
+            <div class="command-history" id="commandHistory">
+                <div style="color: #8b92a9; font-size: 12px; margin-bottom: 10px;">Conversation History:</div>
+            </div>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="preview-panel">
+            <div class="preview-header">
+                <div class="browser-controls">
+                    <div class="browser-dot"></div>
+                    <div class="browser-dot"></div>
+                    <div class="browser-dot"></div>
+                </div>
+                <div class="url-bar">https://example-site.com</div>
+            </div>
+            
+            <div class="preview-content">
+                <div class="demo-site">
+                    <div class="demo-header">
+                        <h1 id="siteTitle">Welcome to Our Amazing Product</h1>
+                        <p id="siteSubtitle">Transform your workflow with our innovative solution</p>
+                    </div>
+
+                    <div class="demo-features" id="features">
+                        <div class="feature-card">
+                            <div class="feature-icon">🚀</div>
+                            <h3>Fast Performance</h3>
+                            <p>Lightning-fast processing that saves you time</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🛡️</div>
+                            <h3>Secure & Reliable</h3>
+                            <p>Your data is protected with enterprise-grade security</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🎨</div>
+                            <h3>Beautiful Design</h3>
+                            <p>Intuitive interface that's a joy to use</p>
+                        </div>
+                    </div>
+
+                    <div class="cta-section" id="ctaSection">
+                        <h2>Ready to Get Started?</h2>
+                        <p>Join thousands of satisfied customers today</p>
+                        <button class="cta-button">Start Free Trial</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isListening = false;
+        let recognition = null;
+        let audioContext = null;
+        let analyser = null;
+        let microphone = null;
+        let animationFrame = null;
+        let rippleTimeout = null;
+        let isSpeaking = false;
+        let currentAudio = null;
+
+        // Voice ID mapping
+        const VOICE_IDS = {
+            'Sentauri': 'qSV5UqvHBC0Widy71Esh',
+            'Rachel': '21m00Tcm4TlvDq8ikWAM',
+            'Domi': 'AZnzlk1XvdvUeBnXmlld',
+            'Bella': 'EXAVITQu4vr4xnSDxMaL',
+            'Antoni': 'ErXwobaYiN019PkySvjV',
+            'Elli': 'MF3mGyEYCl7XYWbV9V6O',
+            'Josh': 'TxGEqnHWrfWFTfGW9XjX',
+            'Arnold': 'VR6AewLTigWG4xSOukaG',
+            'Adam': 'pNInz6obpgDQGcFmaJgB',
+            'Sam': 'yoZ06aMxZJJ28mfd3POQ'
+        };
+
+        // Get API base URL - Cloudflare Pages handles API routes automatically
+        const API_BASE_URL = '';
+
+        // Initialize speech recognition
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onresult = function(event) {
+                const command = event.results[0][0].transcript;
+                processCommand(command);
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                stopListening();
+            };
+
+            recognition.onend = function() {
+                stopListening();
+            };
+        }
+
+        // Initialize audio context for voice visualization
+        async function initializeAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+                analyser.smoothingTimeConstant = 0.7;
+
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                microphone = audioContext.createMediaStreamSource(stream);
+                microphone.connect(analyser);
+
+                visualizeVoice();
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
+            }
+        }
+
+        function visualizeVoice() {
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            function animate() {
+                if (!isListening) {
+                    resetVoiceAnimation();
+                    return;
+                }
+
+                animationFrame = requestAnimationFrame(animate);
+                analyser.getByteFrequencyData(dataArray);
+
+                // Calculate average volume
+                let sum = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    sum += dataArray[i];
+                }
+                const average = sum / bufferLength;
+                const normalizedVolume = average / 255;
+
+                // Animate sound bars based on frequency data
+                animateSoundBars(dataArray);
+                
+                // Animate avatar based on volume
+                if (normalizedVolume > 0.1) {
+                    animateAvatar(normalizedVolume);
+                    triggerRipple(normalizedVolume);
+                }
+            }
+
+            animate();
+        }
+
+        function animateSoundBars(dataArray) {
+            const bars = ['bar1', 'bar2', 'bar3', 'bar4', 'bar5'];
+            const segments = Math.floor(dataArray.length / bars.length);
+
+            bars.forEach((barId, index) => {
+                const start = index * segments;
+                const end = start + segments;
+                let sum = 0;
+                
+                for (let i = start; i < end; i++) {
+                    sum += dataArray[i];
+                }
+                
+                const average = sum / segments;
+                const height = Math.max(10, Math.min(60, (average / 255) * 60));
+                const bar = document.getElementById(barId);
+                
+                if (bar) {
+                    bar.style.height = height + 'px';
+                    bar.style.transition = 'height 0.1s ease-out';
+                }
+            });
+        }
+
+        function animateAvatar(volume) {
+            const avatar = document.getElementById('assistantAvatar');
+            const leftEye = document.getElementById('leftEye');
+            const rightEye = document.getElementById('rightEye');
+            
+            // Add speaking class for glow effect
+            avatar.classList.add('speaking');
+            
+            // Animate eyes based on volume
+            const eyeHeight = 24 + (volume * 20);
+            leftEye.style.height = eyeHeight + 'px';
+            rightEye.style.height = eyeHeight + 'px';
+            
+            // Slight scale animation based on volume
+            const scale = 1 + (volume * 0.1);
+            avatar.style.transform = `scale(${scale})`;
+        }
+
+        function triggerRipple(volume) {
+            if (rippleTimeout) return;
+            
+            const ripple1 = document.getElementById('voiceRipple1');
+            const ripple2 = document.getElementById('voiceRipple2');
+            
+            if (volume > 0.3) {
+                ripple1.classList.add('active');
+                setTimeout(() => {
+                    ripple2.classList.add('active');
+                }, 200);
+                
+                rippleTimeout = setTimeout(() => {
+                    ripple1.classList.remove('active');
+                    ripple2.classList.remove('active');
+                    rippleTimeout = null;
+                }, 1500);
+            }
+        }
+
+        function resetVoiceAnimation() {
+            const bars = ['bar1', 'bar2', 'bar3', 'bar4', 'bar5'];
+            bars.forEach(barId => {
+                const bar = document.getElementById(barId);
+                if (bar) {
+                    bar.style.height = '20px';
+                }
+            });
+            
+            const avatar = document.getElementById('assistantAvatar');
+            const leftEye = document.getElementById('leftEye');
+            const rightEye = document.getElementById('rightEye');
+            
+            avatar.classList.remove('speaking');
+            avatar.style.transform = 'scale(1)';
+            leftEye.style.height = '24px';
+            rightEye.style.height = '24px';
+        }
+
+        function toggleListening() {
+            if (isListening) {
+                stopListening();
+            } else {
+                startListening();
+            }
+        }
+
+        async function startListening() {
+            if (!recognition) {
+                addCommandToHistory("Speech recognition not supported in your browser", 'error');
+                await speakWithElevenLabs("I'm sorry, but speech recognition is not supported in your browser. Please try using Chrome.");
+                return;
+            }
+
+            isListening = true;
+            document.getElementById('voiceButton').classList.add('listening');
+            document.getElementById('voiceButton').innerHTML = '⏹️ Stop Listening';
+            document.getElementById('listeningIndicator').classList.add('active');
+            
+            // Initialize audio if not already done
+            if (!audioContext) {
+                await initializeAudio();
+            } else {
+                visualizeVoice();
+            }
+            
+            recognition.start();
+            
+            // Animate assistant waking up
+            animateWakeUp();
+        }
+
+        function animateWakeUp() {
+            const avatar = document.getElementById('assistantAvatar');
+            avatar.style.transition = 'transform 0.5s ease-out';
+            avatar.style.transform = 'scale(1.1)';
+            
+            setTimeout(() => {
+                avatar.style.transform = 'scale(1)';
+            }, 500);
+        }
+
+        function stopListening() {
+            isListening = false;
+            document.getElementById('voiceButton').classList.remove('listening');
+            document.getElementById('voiceButton').innerHTML = '🎤 Start Voice Command';
+            document.getElementById('listeningIndicator').classList.remove('active');
+            
+            if (recognition) {
+                recognition.stop();
+            }
+            
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+            }
+            
+            resetVoiceAnimation();
+        }
+
+        async function processCommand(command) {
+            addCommandToHistory(`You: "${command}"`, 'user');
+            
+            // Animate processing
+            animateProcessing();
+            
+            // Process different commands
+            const lowerCommand = command.toLowerCase();
+            let response = "";
+            let success = false;
+            
+            if (lowerCommand.includes('title')) {
+                const match = command.match(/title to (.+)/i);
+                if (match) {
+                    changeTitle(match[1]);
+                    response = `I've changed the title to "${match[1]}" for you. Looking good!`;
+                    success = true;
+                }
+            } else if (lowerCommand.includes('background')) {
+                if (lowerCommand.includes('blue')) {
+                    changeBackground('#e3f2fd');
+                    response = "I've changed the background to a nice blue color. It looks fresh and modern!";
+                    success = true;
+                } else if (lowerCommand.includes('green')) {
+                    changeBackground('#e8f5e9');
+                    response = "The background is now green. Perfect for a nature-inspired theme!";
+                    success = true;
+                } else if (lowerCommand.includes('red')) {
+                    changeBackground('#ffebee');
+                    response = "I've set the background to red. Bold choice! It really makes a statement.";
+                    success = true;
+                } else if (lowerCommand.includes('yellow')) {
+                    changeBackground('#fffde7');
+                    response = "The background is now yellow. Bright and cheerful!";
+                    success = true;
+                } else if (lowerCommand.includes('dark')) {
+                    changeBackground('#263238');
+                    document.querySelector('.preview-content').style.color = '#ffffff';
+                    response = "I've switched to a dark background with white text. Perfect for a modern, sleek look!";
+                    success = true;
+                }
+            } else if (lowerCommand.includes('subtitle') || lowerCommand.includes('description')) {
+                const match = command.match(/(?:subtitle|description) to (.+)/i);
+                if (match) {
+                    changeSubtitle(match[1]);
+                    response = `The subtitle has been updated to "${match[1]}". Great choice of words!`;
+                    success = true;
+                }
+            } else if (lowerCommand.includes('button')) {
+                if (lowerCommand.includes('color')) {
+                    if (lowerCommand.includes('green')) {
+                        changeButtonColor('#4caf50');
+                        response = "I've changed the button section to green. It has a nice, positive feel!";
+                        success = true;
+                    } else if (lowerCommand.includes('red')) {
+                        changeButtonColor('#f44336');
+                        response = "The button section is now red. Very eye-catching!";
+                        success = true;
+                    } else if (lowerCommand.includes('purple')) {
+                        changeButtonColor('#9c27b0');
+                        response = "I've made the button section purple. Elegant and unique!";
+                        success = true;
+                    }
+                } else if (lowerCommand.includes('text')) {
+                    const match = command.match(/button (?:text|to) (.+)/i);
+                    if (match) {
+                        changeButtonText(match[1]);
+                        response = `The button now says "${match[1]}". Perfect call-to-action!`;
+                        success = true;
+                    }
+                }
+            } else if (lowerCommand.includes('add') && lowerCommand.includes('feature')) {
+                addFeature();
+                response = "I've added a new feature card for you. Your product is looking more impressive!";
+                success = true;
+            } else if (lowerCommand.includes('remove') && lowerCommand.includes('feature')) {
+                removeFeature();
+                response = "I've removed the last feature card. Sometimes less is more!";
+                success = true;
+            } else if (lowerCommand.includes('animate')) {
+                animateElements();
+                response = "Watch this! I'm animating the page elements. Pretty cool, right?";
+                success = true;
+            } else {
+                response = "I didn't quite understand that command. Try saying something like 'Change the title to...' or 'Make the background blue'.";
+            }
+            
+            // Add AI response and speak it
+            setTimeout(async () => {
+                addCommandToHistory(`Sentauri: ${response}`, 'ai-response');
+                if (success) {
+                    animateSuccess();
+                }
+                await speakWithElevenLabs(response);
+            }, 500);
+        }
+
+        async function speakWithElevenLabs(text) {
+            if (!document.getElementById('voiceResponseToggle').checked) return;
+            
+            // Stop any current audio
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+            
+            const selectedVoice = document.getElementById('voiceSelect').value;
+            const voiceId = VOICE_IDS[selectedVoice];
+            
+            // Show loading indicator
+            document.getElementById('loadingIndicator').classList.add('active');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/text-to-speech`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        voiceId: voiceId
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to generate speech');
+                }
+
+                const audioBlob = await response.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+                
+                currentAudio = new Audio(audioUrl);
+                
+                // Animate AI speaking
+                currentAudio.onplay = () => {
+                    isSpeaking = true;
+                    animateAISpeaking();
+                };
+                
+                currentAudio.onended = () => {
+                    isSpeaking = false;
+                    stopAISpeaking();
+                    URL.revokeObjectURL(audioUrl);
+                };
+                
+                currentAudio.play();
+                
+            } catch (error) {
+                console.error('TTS error:', error);
+                addCommandToHistory(`Error: ${error.message}`, 'error');
+                // Fallback to browser TTS
+                fallbackToWebSpeech(text);
+            } finally {
+                document.getElementById('loadingIndicator').classList.remove('active');
+            }
+        }
+
+        function fallbackToWebSpeech(text) {
+            const synthesis = window.speechSynthesis;
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            utterance.rate = 1.0;
+            utterance.pitch = 1.1;
+            utterance.volume = 0.9;
+            
+            utterance.onstart = () => {
+                isSpeaking = true;
+                animateAISpeaking();
+            };
+            
+            utterance.onend = () => {
+                isSpeaking = false;
+                stopAISpeaking();
+            };
+            
+            synthesis.speak(utterance);
+        }
+
+        function animateAISpeaking() {
+            const avatar = document.getElementById('assistantAvatar');
+            const leftEye = document.getElementById('leftEye');
+            const rightEye = document.getElementById('rightEye');
+            const mouth = document.getElementById('mouth');
+            const ripple1 = document.getElementById('voiceRipple1');
+            const ripple2 = document.getElementById('voiceRipple2');
+            
+            avatar.classList.add('ai-speaking');
+            leftEye.classList.add('ai-speaking');
+            rightEye.classList.add('ai-speaking');
+            mouth.classList.add('active');
+            
+            // Trigger AI ripples
+            const triggerRipples = () => {
+                if (!isSpeaking) return;
+                
+                ripple1.classList.add('ai-active');
+                setTimeout(() => {
+                    ripple2.classList.add('ai-active');
+                }, 300);
+                
+                setTimeout(() => {
+                    ripple1.classList.remove('ai-active');
+                    ripple2.classList.remove('ai-active');
+                    if (isSpeaking) {
+                        setTimeout(triggerRipples, 500);
+                    }
+                }, 1500);
+            };
+            
+            triggerRipples();
+        }
+
+        function stopAISpeaking() {
+            const avatar = document.getElementById('assistantAvatar');
+            const leftEye = document.getElementById('leftEye');
+            const rightEye = document.getElementById('rightEye');
+            const mouth = document.getElementById('mouth');
+            
+            avatar.classList.remove('ai-speaking');
+            leftEye.classList.remove('ai-speaking');
+            rightEye.classList.remove('ai-speaking');
+            mouth.classList.remove('active');
+        }
+
+        function animateProcessing() {
+            const avatar = document.getElementById('assistantAvatar');
+            avatar.style.animation = 'pulse 0.5s ease-in-out 3';
+            
+            setTimeout(() => {
+                avatar.style.animation = 'float 3s ease-in-out infinite';
+            }, 1500);
+        }
+
+        function animateSuccess() {
+            const leftEye = document.getElementById('leftEye');
+            const rightEye = document.getElementById('rightEye');
+            
+            // Make eyes briefly wider (happy expression)
+            leftEye.style.width = '16px';
+            rightEye.style.width = '16px';
+            
+            setTimeout(() => {
+                leftEye.style.width = '12px';
+                rightEye.style.width = '12px';
+            }, 500);
+        }
+
+        function animateElements() {
+            const cards = document.querySelectorAll('.feature-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.transform = 'rotateY(360deg)';
+                    card.style.transition = 'transform 0.6s';
+                    
+                    setTimeout(() => {
+                        card.style.transform = 'rotateY(0)';
+                    }, 600);
+                }, index * 100);
+            });
+        }
+
+        function changeTitle(newTitle) {
+            const titleElement = document.getElementById('siteTitle');
+            titleElement.classList.add('highlight');
+            titleElement.textContent = newTitle;
+            setTimeout(() => titleElement.classList.remove('highlight'), 2000);
+        }
+
+        function changeSubtitle(newSubtitle) {
+            const subtitleElement = document.getElementById('siteSubtitle');
+            subtitleElement.classList.add('highlight');
+            subtitleElement.textContent = newSubtitle;
+            setTimeout(() => subtitleElement.classList.remove('highlight'), 2000);
+        }
+
+        function changeBackground(color) {
+            document.querySelector('.preview-content').style.backgroundColor = color;
+        }
+
+        function changeButtonColor(color) {
+            const ctaSection = document.getElementById('ctaSection');
+            ctaSection.style.backgroundColor = color;
+            ctaSection.classList.add('highlight');
+            setTimeout(() => ctaSection.classList.remove('highlight'), 2000);
+        }
+
+        function changeButtonText(text) {
+            const button = document.querySelector('.cta-button');
+            button.classList.add('highlight');
+            button.textContent = text;
+            setTimeout(() => button.classList.remove('highlight'), 2000);
+        }
+
+        function addFeature() {
+            const featuresContainer = document.getElementById('features');
+            const icons = ['✨', '💡', '🎯', '🔧', '📈', '🎉'];
+            const titles = ['Innovation', 'Smart Features', 'Precision Tools', 'Easy Setup', 'Analytics', 'Celebration Mode'];
+            const descriptions = [
+                'Cutting-edge technology at your fingertips',
+                'Intelligent automation that learns from you',
+                'Targeted solutions for your needs',
+                'Get started in minutes, not hours',
+                'Deep insights into your performance',
+                'Because success should be celebrated'
+            ];
+            const randomIndex = Math.floor(Math.random() * icons.length);
+            
+            const newFeature = document.createElement('div');
+            newFeature.className = 'feature-card';
+            newFeature.innerHTML = `
+                <div class="feature-icon">${icons[randomIndex]}</div>
+                <h3>${titles[randomIndex]}</h3>
+                <p>${descriptions[randomIndex]}</p>
+            `;
+            newFeature.classList.add('highlight');
+            newFeature.style.opacity = '0';
+            newFeature.style.transform = 'scale(0.8)';
+            featuresContainer.appendChild(newFeature);
+            
+            setTimeout(() => {
+                newFeature.style.transition = 'all 0.5s ease-out';
+                newFeature.style.opacity = '1';
+                newFeature.style.transform = 'scale(1)';
+            }, 100);
+            
+            setTimeout(() => newFeature.classList.remove('highlight'), 2000);
+        }
+
+        function removeFeature() {
+            const features = document.querySelectorAll('.feature-card');
+            if (features.length > 1) {
+                const lastFeature = features[features.length - 1];
+                lastFeature.style.transform = 'scale(0) rotate(180deg)';
+                lastFeature.style.opacity = '0';
+                setTimeout(() => {
+                    lastFeature.remove();
+                }, 500);
+            }
+        }
+
+        function addCommandToHistory(command, type = 'default') {
+            const historyContainer = document.getElementById('commandHistory');
+            const commandItem = document.createElement('div');
+            commandItem.className = 'command-item';
+            if (type === 'ai-response') {
+                commandItem.classList.add('ai-response');
+            } else if (type === 'error') {
+                commandItem.classList.add('error');
+            }
+            commandItem.textContent = command;
+            commandItem.style.opacity = '0';
+            historyContainer.appendChild(commandItem);
+            
+            setTimeout(() => {
+                commandItem.style.opacity = '1';
+            }, 100);
+            
+            historyContainer.scrollTop = historyContainer.scrollHeight;
+        }
+
+        // Demo mode for browsers without speech recognition
+        function simulateCommand() {
+            const demoCommands = [
+                "Change the title to AI-Powered Solutions",
+                "Make the background blue",
+                "Change button text to Get Started Now",
+                "Add a new feature",
+                "Change button color to purple",
+                "Animate the page",
+                "Make the background dark"
+            ];
+            const randomCommand = demoCommands[Math.floor(Math.random() * demoCommands.length)];
+            
+            // Simulate voice animation
+            if (!isListening) {
+                startListening();
+                setTimeout(() => {
+                    processCommand(randomCommand);
+                    setTimeout(() => {
+                        stopListening();
+                    }, 1000);
+                }, 1500);
+            }
+        }
+
+        // Add keyboard shortcut for demo
+        document.addEventListener('keydown', (e) => {
+            if (e.key === ' ' && e.ctrlKey) {
+                e.preventDefault();
+                simulateCommand();
+            }
+        });
+
+        // Add some ambient animation to the avatar
+        setInterval(() => {
+            if (!isListening && !isSpeaking) {
+                const leftEye = document.getElementById('leftEye');
+                const rightEye = document.getElementById('rightEye');
+                
+                // Random blink
+                if (Math.random() > 0.95) {
+                    leftEye.style.transform = 'scaleY(0.1)';
+                    rightEye.style.transform = 'scaleY(0.1)';
+                    
+                    setTimeout(() => {
+                        leftEye.style.transform = 'scaleY(1)';
+                        rightEye.style.transform = 'scaleY(1)';
+                    }, 150);
+                }
+            }
+        }, 2000);
+
+        // Welcome message
+        window.addEventListener('load', () => {
+            setTimeout(async () => {
+                await speakWithElevenLabs("Hi! I'm Sentauri. Click the microphone button and tell me how you'd like to modify this website.");
+            }, 1000);
+        });
+
+        // Check backend health
+        fetch(`${API_BASE_URL}/api/health`)
+            .then(res => res.json())
+            .then(data => {
+                console.log('Backend status:', data);
+            })
+            .catch(err => {
+                console.error('Backend not available:', err);
+                addCommandToHistory('Note: Backend server not running. Voice responses will use browser TTS.', 'error');
+            });
+    </script>
+</body>
+</html>
