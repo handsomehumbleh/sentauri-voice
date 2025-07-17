@@ -1,4 +1,4 @@
-// Sentauri Voice Demo - Main JavaScript
+// Sentauri Voice Demo - Main JavaScript with OpenAI Support
 const { API_URL, VOICE_ID, DEMO_SETTINGS, FEATURES } = window.SentauriConfig;
 
 let isListening = false;
@@ -9,6 +9,8 @@ let microphone = null;
 let animationFrame = null;
 let rippleTimeout = null;
 let isSpeaking = false;
+let mediaRecorder = null;
+let audioChunks = [];
 
 // Initialize speech synthesis
 const synth = window.speechSynthesis;
@@ -40,46 +42,95 @@ if (speechSynthesis.onvoiceschanged !== undefined) {
     speechSynthesis.onvoiceschanged = loadVoices;
 }
 
-// Speak function with ElevenLabs integration
+// Enhanced speak function with multiple TTS options
 async function speak(text, callback) {
+    // Priority order: OpenAI > ElevenLabs > Browser
+    if (FEATURES.useOpenAI && window.SentauriConfig.OPENAI_API_KEY) {
+        try {
+            await speakWithOpenAI(text, callback);
+            return;
+        } catch (error) {
+            console.error('OpenAI TTS failed, trying next...', error);
+        }
+    }
+    
     if (FEATURES.useElevenLabs) {
         try {
-            const response = await fetch(`${API_URL}/api/text-to-speech`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    text,
-                    voiceId: VOICE_ID 
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error('ElevenLabs API error');
-            }
-
-            const blob = await response.blob();
-            const audio = new Audio(URL.createObjectURL(blob));
-            
-            audio.onplay = () => {
-                isSpeaking = true;
-                animateSpeaking();
-            };
-            
-            audio.onended = () => {
-                isSpeaking = false;
-                resetSpeakingAnimation();
-                if (callback) callback();
-            };
-            
-            audio.play();
-            trackEvent('voice_response', { type: 'elevenlabs', text_length: text.length });
+            await speakWithElevenLabs(text, callback);
+            return;
         } catch (error) {
-            console.error('ElevenLabs error, falling back to browser TTS:', error);
-            useBrowserTTS(text, callback);
+            console.error('ElevenLabs TTS failed, falling back...', error);
         }
-    } else {
-        useBrowserTTS(text, callback);
     }
+    
+    // Fallback to browser TTS
+    useBrowserTTS(text, callback);
+}
+
+// OpenAI TTS
+async function speakWithOpenAI(text, callback) {
+    const response = await fetch(`${API_URL}/api/text-to-speech/openai`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            text,
+            voice: FEATURES.openaiVoice || 'nova' 
+        })
+    });
+
+    if (!response.ok) {
+        throw new Error('OpenAI TTS failed');
+    }
+
+    const blob = await response.blob();
+    const audio = new Audio(URL.createObjectURL(blob));
+    
+    audio.onplay = () => {
+        isSpeaking = true;
+        animateSpeaking();
+    };
+    
+    audio.onended = () => {
+        isSpeaking = false;
+        resetSpeakingAnimation();
+        if (callback) callback();
+    };
+    
+    audio.play();
+    trackEvent('voice_response', { type: 'openai', text_length: text.length });
+}
+
+// ElevenLabs TTS
+async function speakWithElevenLabs(text, callback) {
+    const response = await fetch(`${API_URL}/api/text-to-speech`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            text,
+            voiceId: VOICE_ID 
+        })
+    });
+
+    if (!response.ok) {
+        throw new Error('ElevenLabs TTS failed');
+    }
+
+    const blob = await response.blob();
+    const audio = new Audio(URL.createObjectURL(blob));
+    
+    audio.onplay = () => {
+        isSpeaking = true;
+        animateSpeaking();
+    };
+    
+    audio.onended = () => {
+        isSpeaking = false;
+        resetSpeakingAnimation();
+        if (callback) callback();
+    };
+    
+    audio.play();
+    trackEvent('voice_response', { type: 'elevenlabs', text_length: text.length });
 }
 
 // Browser TTS fallback
@@ -112,7 +163,7 @@ function useBrowserTTS(text, callback) {
     trackEvent('voice_response', { type: 'browser_tts', text_length: text.length });
 }
 
-// Initialize speech recognition
+// Initialize speech recognition (Browser or Whisper)
 if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognition = new SpeechRecognition();
@@ -122,7 +173,7 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
 
     recognition.onresult = function(event) {
         const command = event.results[0][0].transcript;
-        processCommand(command);
+        processCommandWithAI(command);
     };
 
     recognition.onerror = function(event) {
@@ -134,6 +185,128 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     recognition.onend = function() {
         stopListening();
     };
+}
+
+// Initialize audio recording for Whisper
+async function initializeRecording() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        
+        mediaRecorder.ondataavailable = (event) => {
+            audioChunks.push(event.data);
+        };
+        
+        mediaRecorder.onstop = async () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            audioChunks = [];
+            
+            // Send to Whisper API
+            await processWithWhisper(audioBlob);
+        };
+        
+        return true;
+    } catch (error) {
+        console.error('Failed to initialize recording:', error);
+        return false;
+    }
+}
+
+// Process audio with Whisper
+async function processWithWhisper(audioBlob) {
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'recording.webm');
+    
+    try {
+        const response = await fetch(`${API_URL}/api/speech-to-text`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error('Whisper transcription failed');
+        }
+        
+        const result = await response.json();
+        
+        if (result.transcript) {
+            addCommandToHistory(`You said: "${result.transcript}"`);
+            processCommandWithAI(result.transcript);
+        }
+    } catch (error) {
+        console.error('Whisper error:', error);
+        addCommandToHistory('Failed to transcribe audio. Please try again.');
+    }
+}
+
+// Process command with GPT-4
+async function processCommandWithAI(command) {
+    animateProcessing();
+    
+    if (FEATURES.useGPT4) {
+        try {
+            const response = await fetch(`${API_URL}/api/process-command`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ command })
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                executeCommand(result);
+                speak(result.response, () => {
+                    addCommandToHistory(`✓ Sentauri: ${result.response}`);
+                    animateSuccess();
+                });
+                return;
+            }
+        } catch (error) {
+            console.error('GPT-4 processing failed:', error);
+        }
+    }
+    
+    // Fallback to local processing
+    processCommand(command);
+}
+
+// Execute command from AI
+function executeCommand(commandData) {
+    const { action, target, value } = commandData;
+    
+    switch (action) {
+        case 'style':
+            if (target === 'background') {
+                changeBackground(value);
+            } else if (target === 'button') {
+                changeButtonColor(value);
+            }
+            break;
+        case 'content':
+            if (target === 'title') {
+                changeTitle(value);
+            } else if (target === 'subtitle') {
+                changeSubtitle(value);
+            } else if (target === 'button') {
+                changeButtonText(value);
+            }
+            break;
+        case 'structure':
+            if (target === 'feature' && value === 'add') {
+                addFeature();
+            } else if (target === 'feature' && value === 'remove') {
+                removeFeature();
+            }
+            break;
+        case 'animation':
+            animateElements();
+            break;
+    }
+    
+    trackEvent('command_success', { 
+        action, 
+        target, 
+        ai_processed: true 
+    });
 }
 
 // Initialize audio context for voice visualization
@@ -309,39 +482,67 @@ function toggleListening() {
 }
 
 async function startListening() {
-    if (!recognition) {
+    // Use Whisper if enabled and available
+    if (FEATURES.useWhisper && window.SentauriConfig.OPENAI_API_KEY) {
+        if (!mediaRecorder) {
+            const initialized = await initializeRecording();
+            if (!initialized) {
+                addCommandToHistory("Failed to initialize microphone");
+                return;
+            }
+        }
+        
+        isListening = true;
+        document.getElementById('voiceButton').classList.add('listening');
+        document.getElementById('voiceButton').innerHTML = '⏹️ Stop Recording';
+        document.getElementById('listeningIndicator').classList.add('active');
+        
+        audioChunks = [];
+        mediaRecorder.start();
+        
+        animateWakeUp();
+        speak("I'm recording. Speak your command and click stop when done.");
+        
+        trackEvent('demo_started', { 
+            method: 'whisper',
+            has_microphone: true 
+        });
+        
+    } else if (recognition) {
+        // Use browser speech recognition
+        isListening = true;
+        document.getElementById('voiceButton').classList.add('listening');
+        document.getElementById('voiceButton').innerHTML = '⏹️ Stop Listening';
+        document.getElementById('listeningIndicator').classList.add('active');
+        
+        if (!audioContext && FEATURES.enableVoiceVisualization) {
+            await initializeAudio();
+        } else if (FEATURES.enableVoiceVisualization) {
+            visualizeVoice();
+        }
+        
+        recognition.start();
+        
+        animateWakeUp();
+        
+        const greetings = [
+            "I'm listening! What would you like to change?",
+            "Ready to help! Tell me what to modify.",
+            "Hi there! What should we update?",
+            "Listening now. How can I improve your site?"
+        ];
+        speak(greetings[Math.floor(Math.random() * greetings.length)]);
+        
+        trackEvent('demo_started', { 
+            method: 'browser_speech',
+            has_microphone: true,
+            browser: navigator.userAgent 
+        });
+        
+    } else {
         addCommandToHistory("Speech recognition not supported in your browser");
         speak("Sorry, speech recognition isn't supported in your browser. Try Chrome or Edge for the best experience.");
-        return;
     }
-
-    trackEvent('demo_started', { 
-        has_microphone: true,
-        browser: navigator.userAgent 
-    });
-
-    isListening = true;
-    document.getElementById('voiceButton').classList.add('listening');
-    document.getElementById('voiceButton').innerHTML = '⏹️ Stop Listening';
-    document.getElementById('listeningIndicator').classList.add('active');
-    
-    if (!audioContext && FEATURES.enableVoiceVisualization) {
-        await initializeAudio();
-    } else if (FEATURES.enableVoiceVisualization) {
-        visualizeVoice();
-    }
-    
-    recognition.start();
-    
-    animateWakeUp();
-    
-    const greetings = [
-        "I'm listening! What would you like to change?",
-        "Ready to help! Tell me what to modify.",
-        "Hi there! What should we update?",
-        "Listening now. How can I improve your site?"
-    ];
-    speak(greetings[Math.floor(Math.random() * greetings.length)]);
 }
 
 function stopListening() {
@@ -349,6 +550,10 @@ function stopListening() {
     document.getElementById('voiceButton').classList.remove('listening');
     document.getElementById('voiceButton').innerHTML = '🎤 Start Voice Command';
     document.getElementById('listeningIndicator').classList.remove('active');
+    
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+    }
     
     if (recognition) {
         recognition.stop();
@@ -361,7 +566,7 @@ function stopListening() {
     resetVoiceAnimation();
 }
 
-// Command processing
+// Original local command processing (fallback)
 function processCommand(command) {
     addCommandToHistory(`You said: "${command}"`);
     trackEvent('voice_command', { command: command });
@@ -627,7 +832,11 @@ function addCommandToHistory(command) {
 
 // Test speech function
 function testSpeech() {
-    speak("Hello! I'm Sentauri, your AI website assistant. I can help you modify websites using voice commands. Just tell me what you'd like to change!");
+    const testMessage = FEATURES.useOpenAI 
+        ? "Hello! I'm Sentauri, powered by OpenAI. I can help you modify websites using advanced AI understanding."
+        : "Hello! I'm Sentauri, your AI website assistant. I can help you modify websites using voice commands.";
+    
+    speak(testMessage);
     trackEvent('test_voice_clicked');
 }
 
@@ -647,11 +856,61 @@ function simulateCommand() {
     if (!isListening) {
         startListening();
         setTimeout(() => {
-            processCommand(randomCommand);
+            processCommandWithAI(randomCommand);
             setTimeout(() => {
                 stopListening();
             }, 1000);
         }, 1500);
+    }
+}
+
+// Complete voice interaction (all-in-one)
+async function completeVoiceInteraction() {
+    if (!FEATURES.useCompleteAPI || !window.SentauriConfig.OPENAI_API_KEY) {
+        return;
+    }
+    
+    try {
+        // Record audio
+        if (!mediaRecorder) {
+            await initializeRecording();
+        }
+        
+        // Start recording
+        audioChunks = [];
+        mediaRecorder.start();
+        
+        // Stop after 5 seconds
+        setTimeout(async () => {
+            mediaRecorder.stop();
+            
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const formData = new FormData();
+            formData.append('audio', audioBlob);
+            
+            // Send to complete endpoint
+            const response = await fetch(`${API_URL}/api/voice-interact`, {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                
+                // Execute command
+                executeCommand(result.command);
+                
+                // Play audio response
+                const audio = new Audio(result.audioUrl);
+                audio.play();
+                
+                addCommandToHistory(`You: "${result.transcript}"`);
+                addCommandToHistory(`Sentauri: ${result.command.response}`);
+            }
+        }, 5000);
+        
+    } catch (error) {
+        console.error('Complete voice interaction failed:', error);
     }
 }
 
@@ -685,8 +944,12 @@ setInterval(() => {
 window.addEventListener('load', () => {
     trackEvent('page_view', { page: 'demo' });
     
+    const welcomeMessage = FEATURES.useOpenAI 
+        ? "Welcome! I'm Sentauri, enhanced with OpenAI. Click the microphone to start modifying this website with natural language."
+        : "Welcome! I'm Sentauri. Click the microphone button to start modifying this website with your voice.";
+    
     setTimeout(() => {
-        speak("Welcome! I'm Sentauri. Click the microphone button to start modifying this website with your voice.", () => {
+        speak(welcomeMessage, () => {
             const button = document.getElementById('voiceButton');
             button.style.animation = 'pulse 2s ease-in-out 3';
         });
