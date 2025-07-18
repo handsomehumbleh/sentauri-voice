@@ -1,13 +1,18 @@
 // Configuration for Sentauri Voice Demo
 const config = {
-    // API Configuration
+    // API Configuration - Auto-detect Cloudflare deployment
     API_URL: window.location.hostname === 'localhost' 
         ? 'http://localhost:3000' 
-        : 'https://api.sentauri.ai', // Update with your production API URL
+        : window.location.hostname.includes('pages.dev')
+        ? '' // Use same origin for Cloudflare Pages
+        : window.location.hostname.includes('sentauri.ai')
+        ? '' // Use same origin for custom domain
+        : 'https://api.sentauri.ai', // Fallback
     
     // Voice Service Keys (set these in environment or here for testing)
-    OPENAI_API_KEY: process.env.OPENAI_API_KEY || '', // Add your key
-    ELEVENLABS_API_KEY: process.env.ELEVENLABS_API_KEY || '', // Add your key
+    // For production, these should be set in Cloudflare environment variables
+    OPENAI_API_KEY: '', // Add your key for local testing only
+    ELEVENLABS_API_KEY: '', // Add your key for local testing only
     
     // Voice IDs
     VOICE_ID: 'qSV5UqvHBC0Widy71Esh', // ElevenLabs voice
@@ -32,7 +37,7 @@ const config = {
         useElevenLabs: false,   // Use ElevenLabs TTS ($0.30/1K chars)
         
         // Speech Recognition Options
-        useWhisper: false,      // Use OpenAI Whisper (more accurate, costs $0.006/min)
+        useWhisper: true,      // Use OpenAI Whisper (more accurate, costs $0.006/min)
         
         // AI Processing
         useGPT4: true,         // Use GPT-4 for command processing
@@ -66,25 +71,26 @@ const config = {
 // Environment detection
 const ENV = {
     isDevelopment: window.location.hostname === 'localhost',
+    isCloudflare: window.location.hostname.includes('pages.dev') || window.location.hostname.includes('sentauri.ai'),
     isProduction: window.location.hostname.includes('sentauri.ai'),
     isDemo: window.location.pathname.includes('demo')
 };
 
-// API Availability Check
+// API Availability Check (disabled on Cloudflare - uses env vars)
 const APIs = {
-    hasOpenAI: !!config.OPENAI_API_KEY,
-    hasElevenLabs: !!config.ELEVENLABS_API_KEY,
-    canUseWhisper: config.FEATURES.useWhisper && config.OPENAI_API_KEY,
-    canUseGPT4: config.FEATURES.useGPT4 && config.OPENAI_API_KEY
+    hasOpenAI: ENV.isCloudflare || !!config.OPENAI_API_KEY,
+    hasElevenLabs: ENV.isCloudflare || !!config.ELEVENLABS_API_KEY,
+    canUseWhisper: config.FEATURES.useWhisper && (ENV.isCloudflare || config.OPENAI_API_KEY),
+    canUseGPT4: config.FEATURES.useGPT4 && (ENV.isCloudflare || config.OPENAI_API_KEY)
 };
 
 // Dynamic feature adjustment based on available APIs
-if (!APIs.hasOpenAI && config.FEATURES.useOpenAI) {
+if (!APIs.hasOpenAI && config.FEATURES.useOpenAI && !ENV.isCloudflare) {
     console.warn('OpenAI API key not configured, falling back to ElevenLabs/Browser TTS');
     config.FEATURES.useOpenAI = false;
 }
 
-if (!APIs.hasElevenLabs && config.FEATURES.useElevenLabs) {
+if (!APIs.hasElevenLabs && config.FEATURES.useElevenLabs && !ENV.isCloudflare) {
     console.warn('ElevenLabs API key not configured, falling back to OpenAI/Browser TTS');
     config.FEATURES.useElevenLabs = false;
 }
