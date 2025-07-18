@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentauri – Voice-Assisted Website Editing (Beta)</title>
+    <meta name="description" content="Join the beta for Sentauri, a voice assistant that lets you edit and deploy websites in real time.">
+    
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    
+    <!-- Basic CSP -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' https://cdn.tailwindcss.com 'unsafe-inline';
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com;
+        font-src 'self' https://fonts.gstatic.com;
+        img-src 'self' data: https:;
+        connect-src 'self' https://api.sentauri.ai;
+        frame-ancestors 'none';
+        base-uri 'self';
+        form-action 'self';
+    ">
+    
+    <!-- External Resources -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- CSRF Token -->
+    <meta name="csrf-token" content="GENERATED_CSRF_TOKEN_HERE">
+    
+    <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body class="bg-gray-900 text-white overflow-x-hidden">
+    <!-- Enhanced Animated Neural Canvas Background -->
+    <canvas id="neuralCanvas" class="neural-canvas"></canvas>
+    
+    <!-- Enhanced Header with Scroll Effect -->
+    <header class="fixed w-full top-0 z-50 glass-dark border-b border-gray-800 transition-all duration-300" id="header">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <!-- Logo with Neural Network SVG -->
+                <div class="flex items-center space-x-3 group cursor-pointer">
+                    <svg width="48" height="48" viewBox="0 0 200 120" class="h-10 w-auto">
+                        <defs>
+                            <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#3B82F6"/>
+                                <stop offset="50%" style="stop-color:#00CEC8"/>
+                                <stop offset="100%" style="stop-color:#4ADE80"/>
+                            </linearGradient>
+                            <filter id="glow">
+                                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                <feMerge>
+                                    <feMergeNode in="coloredBlur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                        </defs>
+                        <g transform="translate(45,10)" filter="url(#glow)">
+                            <path d="M10,50 Q30,30 60,50 Q90,70 110,50" 
+                                  stroke="url(#logoGradient)" 
+                                  stroke-width="3"
+                                  fill="none"
+                                  stroke-linecap="round"
+                                  class="group-hover:stroke-[4] transition-all duration-300"/>
+                            <circle cx="10" cy="50" r="6" fill="#3B82F6" class="group-hover:r-7 transition-all"/>
+                            <circle cx="60" cy="50" r="8" fill="#00CEC8" class="group-hover:r-9 transition-all"/>
+                            <circle cx="110" cy="50" r="6" fill="#4ADE80" class="group-hover:r-7 transition-all"/>
+                        </g>
+                    </svg>
+                    <span class="text-2xl font-bold gradient-text">Sentauri</span>
+                </div>
+                
+                <!-- CTA Button -->
+                <button data-action="start-signup" class="btn-primary text-white px-6 py-2.5 rounded-full font-semibold">
+                    Join Beta
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center bg-gradient-to-br from-gray-900/95 via-blue-900/20 to-gray-900/95 pt-20 px-4">
+        <div class="max-w-7xl mx-auto relative z-10">
+            <div class="text-center">
+                <!-- Live Status Badge -->
+                <div class="inline-flex items-center space-x-2 glass-dark px-6 py-3 rounded-full mb-8 animate-pulse">
+                    <span class="w-2 h-2 bg-yellow-400 rounded-full"></span>
+                    <span class="text-sm font-medium">Live Website Editing • Beta Testing</span>
+                </div>
+                
+                <!-- Main Headline -->
+                <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight">
+                    Edit Your Website<br/>
+                    <span class="gradient-text">with Voice</span>
+                </h1>
+                
+                <p class="text-xl md:text-2xl text-gray-300 mb-12 leading-relaxed max-w-3xl mx-auto">
+                    Sentauri lets you update and deploy websites in real time using voice commands — no coding required.
+                </p>
+                
+                <!-- Enhanced Voice Orb (Text Box Equivalent) -->
+                <div class="mb-12">
+                    <div class="voice-orb mx-auto" id="heroVoiceOrb" role="button" aria-label="Experience Sentauri" data-action="toggle-voice">
+                        <span class="voice-eye eye1"></span>
+                        <span class="voice-eye eye2"></span>
+                    </div>
+                    <p class="text-lg text-gray-400 mt-6">
+                        Try saying "Change the headline to Welcome"
+                    </p>
+                </div>
+                
+                <!-- Primary CTA -->
+                <a href="demo.html" class="btn-primary inline-flex items-center px-10 py-5 rounded-full font-semibold text-lg text-white">
+                    <span class="relative z-10">Try Live Editing</span>
+                    <svg class="w-5 h-5 ml-3 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                    </svg>
+                </a>
+                
+                <!-- Brief Features List -->
+                <div class="mt-12 text-gray-400 max-w-2xl mx-auto">
+                    <p class="text-lg">Live previews, collaborative editing, instant deployment, and privacy-first design.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900/95 border-t border-gray-800 py-8 px-4 relative z-10">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="flex justify-center items-center space-x-3 mb-4">
+                <svg width="36" height="36" viewBox="0 0 200 120" class="h-8 w-auto">
+                    <defs>
+                        <linearGradient id="footerLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#FFFFFF"/>
+                            <stop offset="100%" style="stop-color:#00CEC8"/>
+                        </linearGradient>
+                    </defs>
+                    <g transform="translate(45,10)">
+                        <path d="M10,50 Q30,30 60,50 Q90,70 110,50" 
+                              stroke="url(#footerLogoGrad)" 
+                              stroke-width="3"
+                              fill="none"
+                              stroke-linecap="round"/>
+                        <circle cx="10" cy="50" r="5" fill="white"/>
+                        <circle cx="60" cy="50" r="6" fill="white"/>
+                        <circle cx="110" cy="50" r="5" fill="white"/>
+                    </g>
+                </svg>
+                <span class="text-xl font-bold">Sentauri</span>
+            </div>
+            <p class="text-sm text-gray-400">© 2025 Sentauri. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- External JavaScript -->
+    <script src="assets/js/sentauri-app.js"></script>
+</body>
+</html>

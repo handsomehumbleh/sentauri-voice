@@ -1,300 +1,266 @@
-# Sentauri Voice - AI Assistant Demo
+# Sentauri Voice - AI-Powered Website Editor
 
-🎤 **Transform websites with voice commands using AI**
+Transform websites with voice commands using Sentauri's sophisticated AI technology. Experience the future of web development with our intuitive voice-controlled interface.
 
-[![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/handsomehumbleh/sentauri-voice)
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/handsomehumbleh/sentauri-voice)
+![Sentauri Voice Demo](https://img.shields.io/badge/Sentauri-Voice%20Demo-00CEC8?style=for-the-badge&logo=microphone&logoColor=white)
 
-## 🌟 Features
+## 🎯 Overview
 
-- **Voice-Controlled Website Editing** - Modify websites in real-time using natural language
-- **AI-Powered Responses** - Sentauri responds with context-aware voice feedback
-- **Real-Time Animations** - Voice-responsive avatar with frequency visualization
-- **ElevenLabs Integration** - High-quality text-to-speech voices
-- **Browser Fallback** - Works even without ElevenLabs API key
-- **Analytics Ready** - Google Analytics 4 integration for tracking
+Sentauri Voice is an innovative voice-controlled website editor that demonstrates the power of AI in web development. Built with enterprise-grade technology made accessible for everyone.
 
-## 🚀 Quick Start - Demo
+### Key Features
 
-### Option 1: Run Demo Locally (No Backend Required)
+- 🎙️ **Natural Voice Commands** - Speak naturally to edit your website
+- ⚡ **Real-time Updates** - See changes instantly as you speak
+- 🤖 **AI-Powered Understanding** - Advanced natural language processing
+- 🎨 **Sophisticated Design** - Premium glassmorphism UI with gradient effects
+- 📱 **Responsive Views** - Desktop and mobile preview modes
+- 🎯 **Theme Switching** - Dark/light themes with color variations
 
+## 🚀 Quick Start
+
+1. Clone the repository:
 ```bash
-# Clone the repository
-git clone https://github.com/handsomehumbleh/sentauri-voice.git
+git clone https://github.com/yourusername/sentauri-voice.git
 cd sentauri-voice
-
-# Run the demo (choose one)
-npm run demo          # Uses Python
-npm run demo:node     # Uses Node.js/npx serve
-
-# Open http://localhost:8080/demo.html
 ```
 
-### Option 2: Full Stack with ElevenLabs
-
+2. Serve the files locally:
 ```bash
-# Install dependencies
-npm install
+# Using Python
+python -m http.server 8000
 
-# Create .env file
-echo "ELEVENLABS_API_KEY=your_api_key_here" > .env
+# Using Node.js
+npx serve
 
-# Run the backend
-npm run dev
-
-# In another terminal, run the demo
-npm run demo
-
-# Backend: http://localhost:3000
-# Demo: http://localhost:8080/demo.html
+# Using PHP
+php -S localhost:8000
 ```
 
-## 🎯 Voice Commands
+3. Open in your browser:
+```
+http://localhost:8000
+```
 
-Try these commands in the demo:
+## 🗣️ Voice Commands
 
-- **"Change the title to [your text]"** - Updates the main heading
-- **"Make the background [blue/green/red/yellow/dark]"** - Changes background color
-- **"Change the subtitle to [your text]"** - Updates the tagline
-- **"Change button color to [green/red/purple]"** - Modifies CTA button
-- **"Change button text to [your text]"** - Updates button label
-- **"Add a new feature"** - Adds a feature card
-- **"Remove a feature"** - Removes the last feature
-- **"Animate the page"** - Triggers animations
-- **"Hello"** or **"Help"** - Get assistance
+### Content Editing
+- "Change the title to [your text]"
+- "Change the subtitle to [your text]"
+- "Change the logo to [brand name]"
+- "Change the badge to [text]"
+- "Change the button to [text]"
+
+### Visual Effects
+- "Add a gradient" / "Remove gradient"
+- "Change background to dark/light/blue"
+- "Animate the page"
+- "Hide/Show the navigation"
+- "Hide/Show the stats section"
+
+### Theme Control
+- "Switch to light theme"
+- "Switch to dark theme"
+- "Apply blue/green/purple theme"
+
+### Navigation
+- "Scroll to top/bottom"
+- "Scroll to features"
+- "Scroll to stats"
+
+### Features
+- "Add a new feature"
+- "Remove a feature"
+
+### Help
+- "Help" or "Hello" - Get assistance
+
+## 🛠️ Technical Stack
+
+- **Frontend**: Vanilla JavaScript, HTML5, CSS3
+- **Speech Recognition**: Web Speech API
+- **Design System**: Sentauri Brand Guidelines
+- **Animations**: CSS Animations & JavaScript
+- **Styling**: Custom CSS with CSS Variables
 
 ## 📁 Project Structure
 
 ```
-sentauri-voice/
-├── demo.html          # Main demo interface
-├── demo.js           # Voice interaction logic
-├── config.js         # Configuration settings
-├── server.js         # Backend API server
-├── package.json      # Dependencies and scripts
-├── .env.example      # Environment template
-└── README.md         # This file
+sentauri-voice-updated/
+├── index.html          # Landing page
+├── demo.html          # Voice demo interface
+├── assets/
+│   ├── css/
+│   │   ├── main.css   # Landing page styles
+│   │   └── demo.css   # Demo interface styles
+│   └── js/
+│       ├── sentauri-app.js      # Landing page scripts
+│       ├── voice-recognition.js  # Voice processing
+│       ├── animations.js        # Animation controller
+│       └── demo.js             # Main demo controller
+├── docs/
+│   └── brand-guidelines.md
+└── README.md
 ```
 
-## 🔧 Configuration
+## 🎨 Design System
 
-### Frontend Configuration (config.js)
+### Color Palette
+- **Sentauri Blue**: #3B82F6
+- **Sentauri Cyan**: #00CEC8
+- **Sentauri Green**: #4ADE80
+- **Dark Background**: #0F172A
+- **Glass Overlay**: rgba(255, 255, 255, 0.05)
 
-```javascript
-const config = {
-    API_URL: 'http://localhost:3000',     // Your backend URL
-    VOICE_ID: 'qSV5UqvHBC0Widy71Esh',   // ElevenLabs voice
-    GA_ID: 'G-XXXXXXXXXX',               // Google Analytics ID
-    FEATURES: {
-        useElevenLabs: true,             // Use ElevenLabs TTS
-        enableAnalytics: true,           // Track events
-        enableVoiceVisualization: true   // Show voice waveform
-    }
-};
-```
+### Typography
+- **Headers**: Georgia, serif (light weight)
+- **Body**: system-ui, -apple-system, sans-serif
 
-### Backend Environment (.env)
+### Effects
+- Glassmorphism with backdrop blur
+- Gradient animations
+- Neural network background patterns
+- Floating elements with parallax
 
-```env
-ELEVENLABS_API_KEY=your_api_key_here
-NODE_ENV=production
-PORT=3000
-```
+## 📊 Analytics & Tracking
 
-## 🌐 Deployment
+The demo includes analytics tracking placeholders for:
+- Voice command usage
+- Conversion metrics
+- Performance monitoring
+- User engagement
 
-### Deploy Demo Only (Static Sites)
-
-#### Vercel
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel --prod
-
-# Set root directory to: .
-# Set build command to: (leave empty)
-# Set output directory to: .
-```
-
-#### Netlify
-1. Drag and drop the project folder to Netlify
-2. Or use Git deployment with these settings:
-   - Build command: (leave empty)
-   - Publish directory: .
-   - Site will be available at: your-site.netlify.app/demo.html
-
-#### GitHub Pages
-1. Go to Settings → Pages
-2. Source: Deploy from branch
-3. Branch: main, folder: / (root)
-4. Access at: username.github.io/sentauri-voice/demo.html
-
-### Deploy Full Stack (Backend + Demo)
-
-#### Railway/Render
-1. Connect GitHub repository
-2. Set environment variables:
-   ```
-   ELEVENLABS_API_KEY=your_key
-   NODE_ENV=production
-   ```
-3. Deploy automatically
-
-#### Heroku
-```bash
-heroku create sentauri-voice
-heroku config:set ELEVENLABS_API_KEY=your_key
-git push heroku main
-```
-
-## 📊 Analytics Setup
-
-1. Create a Google Analytics 4 property
-2. Get your Measurement ID (G-XXXXXXXXXX)
-3. Update `config.js`:
-   ```javascript
-   GA_ID: 'G-YOUR-ACTUAL-ID'
-   ```
-
-### Tracked Events
-- `demo_started` - User begins voice interaction
-- `voice_command` - Each command spoken
-- `command_success` - Successful execution
-- `test_voice_clicked` - Voice test button
-- `speech_error` - Recognition errors
-
-## 🔒 Security
-
-### CORS Configuration
-The backend includes CORS headers for:
-- Local development (localhost:8080, 8000)
-- Production domains (sentauri.ai)
-- Common deployment platforms
-
-To add your domain:
-```javascript
-// In server.js
-const allowedOrigins = [
-    'https://your-domain.com',
-    // ... other origins
-];
-```
-
-### Rate Limiting
-- API: 100 requests per 15 minutes
-- TTS: 10 requests per minute
-
-## 🧪 Browser Support
-
-| Feature | Chrome | Edge | Safari | Firefox |
-|---------|--------|------|--------|---------|
-| Speech Recognition | ✅ | ✅ | ⚠️ | ⚠️ |
-| ElevenLabs TTS | ✅ | ✅ | ✅ | ✅ |
-| Browser TTS | ✅ | ✅ | ✅ | ✅ |
-| Voice Visualization | ✅ | ✅ | ✅ | ✅ |
-
-⚠️ = Limited support, fallbacks available
-
-## 🛠️ Development
+## 🔧 Customization
 
 ### Adding New Commands
 
-1. Edit `demo.js` in the `processCommand()` function:
+1. Open `assets/js/demo.js`
+2. Add your command in the `CommandProcessor.process()` method:
+
 ```javascript
 else if (lowerCommand.includes('your_command')) {
-    performAction();
-    responseText = "Action completed!";
-    actionTaken = true;
+    result = this.yourCustomMethod(command);
 }
 ```
 
-2. Add the action function:
+3. Implement your custom method:
+
 ```javascript
-function performAction() {
-    // Your code here
-    document.getElementById('element').style.property = 'value';
+yourCustomMethod(command) {
+    // Your logic here
+    return {
+        success: true,
+        message: "Command executed successfully",
+        action: 'your_action'
+    };
 }
 ```
 
-### Customizing the Avatar
+### Styling Modifications
 
-Modify CSS in `demo.html`:
+Use CSS variables for easy theming:
+
 ```css
-.assistant-avatar {
-    background: linear-gradient(135deg, #your-color-1, #your-color-2);
-    /* Adjust size, animations, etc. */
+:root {
+    --sentauri-blue: #3B82F6;
+    --sentauri-cyan: #00CEC8;
+    --sentauri-green: #4ADE80;
 }
 ```
 
-### Using Different Voices
+## 🌐 Browser Support
 
-Get voice IDs from [ElevenLabs](https://elevenlabs.io/voice-library):
-```javascript
-// In config.js
-VOICE_ID: 'different_voice_id_here'
-```
+- ✅ Chrome (Recommended)
+- ✅ Edge
+- ⚠️ Safari (Limited voice support)
+- ⚠️ Firefox (Limited voice support)
+
+## 📱 Mobile Support
+
+- Responsive design for all screen sizes
+- Touch-friendly interface
+- Mobile preview mode in demo
+
+## 🚀 Deployment
+
+### Static Hosting (Recommended)
+
+Deploy to any static hosting service:
+
+- **Netlify**: Drop folder into Netlify
+- **Vercel**: `vercel --prod`
+- **GitHub Pages**: Enable in repository settings
+
+### Custom Domain
+
+1. Upload files to your hosting
+2. Configure DNS settings
+3. Set up SSL certificate
 
 ## 🐛 Troubleshooting
 
-### "Speech recognition not supported"
-- Use Chrome or Edge for best results
-- Ensure microphone permissions are granted
-- Check HTTPS connection (required for speech API)
+### Microphone Not Working
+- Check browser permissions
+- Ensure HTTPS connection
+- Try Chrome or Edge browsers
 
-### "Voice service not configured"
-- Add your ElevenLabs API key to `.env`
-- Restart the backend server
-- Check API key validity
+### Voice Recognition Issues
+- Speak clearly and naturally
+- Check internet connection
+- Verify microphone is working
 
-### CORS Errors
-- Ensure backend is running
-- Check `API_URL` in `config.js`
-- Verify your domain is in `allowedOrigins`
+### Animation Performance
+- Reduce effects on older devices
+- Check GPU acceleration
+- Update graphics drivers
 
-### No Audio Output
-- Check browser audio permissions
-- Verify ElevenLabs API quota
-- Test with browser TTS (set `useElevenLabs: false`)
+## 📈 Performance Optimization
 
-## 📈 Performance Tips
+- Lazy loading for assets
+- CSS animations over JavaScript
+- Efficient event delegation
+- Optimized animation frame rates
 
-1. **Optimize API Calls**
-   - Cache common phrases
-   - Implement request debouncing
-   - Use browser TTS for non-critical responses
+## 🔒 Security
 
-2. **Improve Load Time**
-   - Minify JS/CSS for production
-   - Use CDN for static assets
-   - Enable gzip compression
-
-3. **Scale Backend**
-   - Use PM2 for process management
-   - Implement Redis for rate limiting
-   - Deploy behind a load balancer
+- Content Security Policy headers
+- HTTPS requirement for voice API
+- No external dependencies
+- Client-side only processing
 
 ## 🤝 Contributing
 
+We welcome contributions! Please:
+
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
 5. Open a Pull Request
 
-## 📝 License
+## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🙏 Acknowledgments
-
-- [ElevenLabs](https://elevenlabs.io) for voice synthesis
-- [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API) for recognition
-- [Claude](https://claude.ai) for AI assistance
-
----
+## 👥 Team
 
 Built with ❤️ by the Sentauri Team
 
-**Need help?** Open an issue or reach out at hello@sentauri.ai
+- **Website**: [sentauri.ai](https://sentauri.ai)
+- **Email**: hello@sentauri.ai
+- **Discord**: [Join our community](https://discord.gg/sentauri)
+
+## 🎯 Roadmap
+
+- [ ] Multi-language support
+- [ ] Custom voice models
+- [ ] Advanced animations
+- [ ] Template library
+- [ ] Export functionality
+- [ ] Collaboration features
+
+---
+
+**Experience the future of web development with Sentauri Voice**
+
+*"Sophisticated Tech Made Accessible"*

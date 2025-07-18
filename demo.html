@@ -3,538 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sentauri - AI Voice Assistant Demo</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0e1a;
-            color: #ffffff;
-            overflow: hidden;
-        }
-
-        /* Navigation */
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 50px;
-            background: rgba(10, 14, 26, 0.9);
-            backdrop-filter: blur(10px);
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 100;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #4a9eff;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 30px;
-            align-items: center;
-        }
-
-        .nav-links a {
-            color: #ffffff;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .nav-links a:hover {
-            color: #4a9eff;
-        }
-
-        .demo-button {
-            background: #54c969;
-            color: #ffffff;
-            padding: 10px 25px;
-            border-radius: 25px;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-
-        .demo-button:hover {
-            background: #42a756;
-            transform: translateY(-2px);
-        }
-
-        /* Main Content */
-        .main-container {
-            display: flex;
-            height: 100vh;
-            margin-top: 70px;
-        }
-
-        /* Assistant Panel */
-        .assistant-panel {
-            width: 40%;
-            background: linear-gradient(135deg, #1a1f35 0%, #0f1422 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .assistant-panel::before {
-            content: '';
-            position: absolute;
-            width: 300%;
-            height: 300%;
-            background: radial-gradient(circle, rgba(74, 158, 255, 0.1) 0%, transparent 70%);
-            animation: pulse 4s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(0.8); opacity: 0.5; }
-            50% { transform: scale(1.2); opacity: 0.8; }
-        }
-
-        .assistant-avatar {
-            width: 200px;
-            height: 200px;
-            background: linear-gradient(135deg, #e8f0ff 0%, #d4e3ff 100%);
-            border-radius: 50%;
-            position: relative;
-            z-index: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 20px 60px rgba(74, 158, 255, 0.3);
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-
-        .eyes {
-            display: flex;
-            gap: 40px;
-        }
-
-        .eye {
-            width: 12px;
-            height: 24px;
-            background: #4a9eff;
-            border-radius: 50%;
-            position: relative;
-            animation: blink 4s infinite;
-        }
-
-        @keyframes blink {
-            0%, 90%, 100% { transform: scaleY(1); }
-            95% { transform: scaleY(0.1); }
-        }
-
-        .listening-indicator {
-            position: absolute;
-            bottom: -30px;
-            display: flex;
-            gap: 8px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .listening-indicator.active {
-            opacity: 1;
-        }
-
-        .sound-bar {
-            width: 4px;
-            height: 20px;
-            background: #4a9eff;
-            border-radius: 2px;
-            animation: soundWave 0.5s ease-in-out infinite;
-        }
-
-        .sound-bar:nth-child(2) { animation-delay: 0.1s; }
-        .sound-bar:nth-child(3) { animation-delay: 0.2s; }
-        .sound-bar:nth-child(4) { animation-delay: 0.3s; }
-        .sound-bar:nth-child(5) { animation-delay: 0.4s; }
-
-        @keyframes soundWave {
-            0%, 100% { height: 20px; }
-            50% { height: 40px; }
-        }
-
-        /* Voice-responsive animations */
-        .assistant-avatar.speaking {
-            animation: float 0.5s ease-in-out infinite, glow 0.3s ease-in-out infinite;
-        }
-
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 20px 60px rgba(74, 158, 255, 0.3); }
-            50% { box-shadow: 0 25px 80px rgba(74, 158, 255, 0.6); }
-        }
-
-        .eye.speaking {
-            animation: none;
-            height: 30px;
-            transition: all 0.1s;
-        }
-
-        .voice-ripple {
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            border: 2px solid rgba(74, 158, 255, 0.4);
-            border-radius: 50%;
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .voice-ripple.active {
-            animation: ripple 1.5s ease-out;
-        }
-
-        @keyframes ripple {
-            0% {
-                transform: scale(0.8);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(2);
-                opacity: 0;
-            }
-        }
-
-        .assistant-text {
-            margin-top: 60px;
-            text-align: center;
-            z-index: 1;
-            position: relative;
-        }
-
-        .assistant-text h2 {
-            font-size: 28px;
-            margin-bottom: 10px;
-            color: #ffffff;
-        }
-
-        .assistant-text p {
-            color: #8b92a9;
-            font-size: 16px;
-            line-height: 1.6;
-        }
-
-        .voice-button {
-            margin-top: 30px;
-            background: #4a9eff;
-            color: white;
-            padding: 15px 40px;
-            border: none;
-            border-radius: 30px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-            z-index: 1;
-        }
-
-        .voice-button:hover {
-            background: #3589e8;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(74, 158, 255, 0.4);
-        }
-
-        .voice-button.listening {
-            background: #ff4a4a;
-        }
-
-        .command-history {
-            position: absolute;
-            bottom: 40px;
-            left: 40px;
-            right: 40px;
-            max-height: 150px;
-            overflow-y: auto;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 20px;
-            backdrop-filter: blur(10px);
-        }
-
-        .command-item {
-            margin-bottom: 10px;
-            padding: 10px;
-            background: rgba(74, 158, 255, 0.1);
-            border-radius: 5px;
-            font-size: 14px;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(-20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        /* Preview Panel */
-        .preview-panel {
-            width: 60%;
-            background: #ffffff;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .preview-header {
-            background: #f5f5f5;
-            padding: 15px 20px;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .browser-controls {
-            display: flex;
-            gap: 8px;
-        }
-
-        .browser-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #ddd;
-        }
-
-        .browser-dot:nth-child(1) { background: #ff5f57; }
-        .browser-dot:nth-child(2) { background: #ffbd2e; }
-        .browser-dot:nth-child(3) { background: #28ca42; }
-
-        .url-bar {
-            flex: 1;
-            background: #ffffff;
-            padding: 8px 15px;
-            border-radius: 20px;
-            color: #666;
-            font-size: 14px;
-        }
-
-        .preview-content {
-            height: calc(100% - 60px);
-            overflow-y: auto;
-            padding: 40px;
-            color: #333;
-        }
-
-        /* Demo Website Styles */
-        .demo-site {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .demo-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .demo-header h1 {
-            font-size: 48px;
-            color: #333;
-            margin-bottom: 20px;
-            transition: all 0.5s;
-        }
-
-        .demo-header p {
-            font-size: 20px;
-            color: #666;
-            transition: all 0.5s;
-        }
-
-        .demo-features {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 30px;
-            margin-top: 60px;
-        }
-
-        .feature-card {
-            background: #f8f9fa;
-            padding: 30px;
-            border-radius: 10px;
-            text-align: center;
-            transition: all 0.5s;
-        }
-
-        .feature-icon {
-            font-size: 48px;
-            margin-bottom: 20px;
-        }
-
-        .feature-card h3 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .feature-card p {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .cta-section {
-            text-align: center;
-            margin-top: 60px;
-            padding: 40px;
-            background: #4a9eff;
-            border-radius: 10px;
-            color: white;
-            transition: all 0.5s;
-        }
-
-        .cta-button {
-            background: white;
-            color: #4a9eff;
-            padding: 15px 40px;
-            border: none;
-            border-radius: 25px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: all 0.3s;
-        }
-
-        .cta-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Highlight Animation */
-        @keyframes highlight {
-            0% { background: #ffeb3b; }
-            100% { background: transparent; }
-        }
-
-        .highlight {
-            animation: highlight 2s ease-out;
-        }
-    </style>
+    <title>Sentauri Voice Demo - AI-Powered Website Editor</title>
+    <link rel="stylesheet" href="assets/css/demo.css">
 </head>
 <body>
-    <!-- Navigation -->
-    <nav>
-        <div class="logo">🤖 Sentauri</div>
-        <div class="nav-links">
-            <a href="#">How It Works</a>
-            <a href="#">Features</a>
-            <a href="#">FAQ</a>
-            <a href="#" class="demo-button">Get Early Access</a>
+    <!-- Navigation Bar -->
+    <nav class="nav-bar">
+        <div class="logo">
+            <svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#3B82F6" />
+                        <stop offset="50%" style="stop-color:#00CEC8" />
+                        <stop offset="100%" style="stop-color:#4ADE80" />
+                    </linearGradient>
+                </defs>
+                <circle cx="20" cy="40" r="8" fill="white" opacity="0.9"/>
+                <circle cx="60" cy="40" r="8" fill="white" opacity="0.9"/>
+                <circle cx="100" cy="40" r="8" fill="white" opacity="0.9"/>
+                <path d="M 20,40 Q 40,20 60,40 T 100,40" stroke="url(#logoGradient)" stroke-width="3" fill="none"/>
+            </svg>
+            <span class="logo-text">Sentauri</span>
+        </div>
+        <div class="nav-actions">
+            <span style="color: var(--text-muted); font-size: 14px;">Voice Demo</span>
+            <a href="index.html" class="btn-back">← Back to Home</a>
         </div>
     </nav>
 
-    <!-- Main Container -->
-    <div class="main-container">
-        <!-- Assistant Panel -->
-        <div class="assistant-panel">
-            <div class="assistant-avatar" id="assistantAvatar">
-                <div class="eyes">
-                    <div class="eye" id="leftEye"></div>
-                    <div class="eye" id="rightEye"></div>
+    <!-- Main Demo Container -->
+    <div class="demo-container">
+        <!-- AI Assistant Panel -->
+        <div class="ai-panel">
+            <div class="ai-avatar-container">
+                <div class="ai-avatar" id="aiAvatar">
+                    <span class="voice-eye eye-left"></span>
+                    <span class="voice-eye eye-right"></span>
                 </div>
-                <div class="listening-indicator" id="listeningIndicator">
-                    <div class="sound-bar" id="bar1"></div>
-                    <div class="sound-bar" id="bar2"></div>
-                    <div class="sound-bar" id="bar3"></div>
-                    <div class="sound-bar" id="bar4"></div>
-                    <div class="sound-bar" id="bar5"></div>
-                </div>
-                <div class="voice-ripple" id="voiceRipple1"></div>
-                <div class="voice-ripple" id="voiceRipple2"></div>
-            </div>
-            
-            <div class="assistant-text">
-                <h2>Hi, I'm Sentauri</h2>
-                <p>Click the button and tell me how to modify the website</p>
-                <p style="font-size: 14px; margin-top: 10px; color: #54c969;">
-                    Try: "Change the title to..." or "Make the background blue"
-                </p>
             </div>
 
-            <button class="voice-button" id="voiceButton" onclick="toggleListening()">
-                🎤 Start Voice Command
+            <div class="voice-status" id="voiceStatus">
+                Click the avatar or button to start
+            </div>
+
+            <div class="command-history">
+                <h3>Conversation History</h3>
+                <div class="command-list" id="commandList">
+                    <!-- Commands will be added here dynamically -->
+                </div>
+            </div>
+
+            <button class="voice-button" id="voiceButton">
+                🎙️ Try Voice Command
             </button>
-            
-            <div style="margin-top: 20px; text-align: center;">
-                <button onclick="testSpeech()" style="background: #2a3f5f; color: white; padding: 8px 20px; border: none; border-radius: 20px; font-size: 14px; cursor: pointer;">
-                    🔊 Test Voice
-                </button>
-            </div>
 
-            <div class="command-history" id="commandHistory">
-                <div style="color: #8b92a9; font-size: 12px; margin-bottom: 10px;">Command History:</div>
+            <div class="help-tooltip" id="helpTooltip">
+                Try saying: "Change the title to Welcome to the Future", "Change the logo to MyBrand", "Switch to light theme", "Apply blue theme", or "Hide the stats section"
             </div>
         </div>
 
-        <!-- Preview Panel -->
+        <!-- Live Preview Panel -->
         <div class="preview-panel">
-            <div class="preview-header">
+            <!-- Browser Chrome -->
+            <div class="browser-chrome">
                 <div class="browser-controls">
-                    <div class="browser-dot"></div>
-                    <div class="browser-dot"></div>
-                    <div class="browser-dot"></div>
+                    <div class="browser-dot close"></div>
+                    <div class="browser-dot minimize"></div>
+                    <div class="browser-dot maximize"></div>
                 </div>
-                <div class="url-bar">https://example-site.com</div>
+                <div class="browser-url-bar">
+                    <span class="url-icon">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                    </span>
+                    <span class="url-text">https://preview.sentauri.ai/demo</span>
+                </div>
+                <div class="screen-toggle">
+                    <button class="screen-toggle-btn active" id="webViewBtn" title="Desktop View">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                    </button>
+                    <button class="screen-toggle-btn" id="mobileViewBtn" title="Mobile View">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                            <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="browser-actions">
+                    <button class="browser-action" title="Refresh">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                    </button>
+                    <button class="browser-action" id="themeToggleBtn" title="Toggle Theme">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                            <!-- Sun icon for dark mode (showing light mode is available) -->
+                            <g class="sun-icon">
+                                <circle cx="12" cy="12" r="5" fill="currentColor"></circle>
+                                <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1m20.5-9.5L18 6m-6 6-3.5 3.5M3.5 3.5L7 7m6 6 3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                            </g>
+                            <!-- Moon icon for light mode (showing dark mode is available) -->
+                            <path class="moon-icon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor" style="display: none;"></path>
+                        </svg>
+                    </button>
+                    <button class="browser-action" title="More options">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="1"></circle>
+                            <circle cx="12" cy="5" r="1"></circle>
+                            <circle cx="12" cy="19" r="1"></circle>
+                        </svg>
+                    </button>
+                </div>
             </div>
             
+            <!-- Preview Content -->
             <div class="preview-content">
-                <div class="demo-site">
-                    <div class="demo-header">
-                        <h1 id="siteTitle">Welcome to Our Amazing Product</h1>
-                        <p id="siteSubtitle">Transform your workflow with our innovative solution</p>
-                    </div>
-
-                    <div class="demo-features" id="features">
-                        <div class="feature-card">
-                            <div class="feature-icon">🚀</div>
-                            <h3>Fast Performance</h3>
-                            <p>Lightning-fast processing that saves you time</p>
+                <!-- Mobile Preview Container -->
+                <div class="mobile-preview-container">
+                    <div class="mobile-device">
+                        <div class="mobile-notch"></div>
+                        <div class="mobile-screen" id="mobileScreen">
+                            <!-- Mobile content will be cloned here -->
                         </div>
+                    </div>
+                </div>
+                
+                <!-- Web Preview -->
+                <div class="preview-wrapper">
+                    <div class="preview-bg-pattern"></div>
+                
+                <!-- Preview Navbar -->
+                <nav class="preview-navbar element-highlight" id="previewNavbar">
+                    <div class="preview-logo element-highlight" id="previewLogo">TechVision</div>
+                    <div class="preview-nav-links">
+                        <a href="#" class="preview-nav-link">Features</a>
+                        <a href="#" class="preview-nav-link">Pricing</a>
+                        <a href="#" class="preview-nav-link">About</a>
+                        <a href="#" class="preview-nav-link">Contact</a>
+                    </div>
+                </nav>
+
+                <!-- Hero Section -->
+                <div class="website-hero" id="heroSection">
+                    <div class="hero-badge element-highlight" id="heroBadge">
+                        <span>🚀</span>
+                        <span>Launching Soon</span>
+                    </div>
+                    <h1 class="website-title element-highlight" id="websiteTitle">
+                        Build Amazing Websites
+                    </h1>
+                    <p class="website-subtitle element-highlight" id="websiteSubtitle">
+                        Transform your ideas into reality with our powerful AI-driven platform
+                    </p>
+                    <div class="hero-buttons">
+                        <button class="website-button element-highlight" id="websiteButton">
+                            Get Started Free
+                        </button>
+                        <button class="website-button website-button-secondary element-highlight" id="secondaryButton">
+                            Watch Demo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Section -->
+                <div class="website-stats" id="statsSection">
+                    <div class="stat-item">
+                        <div class="stat-value element-highlight" id="stat1">10K+</div>
+                        <div class="stat-label">Active Users</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value element-highlight" id="stat2">500+</div>
+                        <div class="stat-label">Templates</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value element-highlight" id="stat3">99.9%</div>
+                        <div class="stat-label">Uptime</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value element-highlight" id="stat4">24/7</div>
+                        <div class="stat-label">Support</div>
+                    </div>
+                </div>
+
+                <!-- Features Section -->
+                <div class="website-features" id="featuresSection">
+                    <div class="features-header">
+                        <h2 class="features-title element-highlight" id="featuresTitle">Powerful Features</h2>
+                        <p class="features-subtitle element-highlight" id="featuresSubtitle">Everything you need to build stunning websites</p>
+                    </div>
+                    <div class="features-grid">
                         <div class="feature-card">
-                            <div class="feature-icon">🛡️</div>
-                            <h3>Secure & Reliable</h3>
-                            <p>Your data is protected with enterprise-grade security</p>
+                            <div class="feature-icon">⚡</div>
+                            <h3 class="feature-title">Lightning Fast</h3>
+                            <p class="feature-desc">Experience blazing fast performance with our optimized infrastructure and CDN</p>
                         </div>
                         <div class="feature-card">
                             <div class="feature-icon">🎨</div>
-                            <h3>Beautiful Design</h3>
-                            <p>Intuitive interface that's a joy to use</p>
+                            <h3 class="feature-title">Beautiful Design</h3>
+                            <p class="feature-desc">Create stunning websites with our professional templates and design tools</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🔒</div>
+                            <h3 class="feature-title">Secure & Reliable</h3>
+                            <p class="feature-desc">Your data is protected with enterprise-grade security and encryption</p>
                         </div>
                     </div>
-
-                    <div class="cta-section" id="ctaSection">
-                        <h2>Ready to Get Started?</h2>
-                        <p>Join thousands of satisfied customers today</p>
-                        <button class="cta-button">Start Free Trial</button>
-                    </div>
                 </div>
+
+                <!-- CTA Section -->
+                <div class="website-cta" id="ctaSection">
+                    <h2 class="cta-title element-highlight" id="ctaTitle">Ready to Get Started?</h2>
+                    <p class="cta-subtitle element-highlight" id="ctaSubtitle">Join thousands of creators building amazing websites</p>
+                    <button class="website-button element-highlight" id="ctaButton">
+                        Start Building Now
+                    </button>
+                </div>
+
+                <!-- Footer -->
+                <footer class="preview-footer" id="previewFooter">
+                    <div class="footer-content">
+                        <div class="footer-brand">
+                            <h3 class="element-highlight" id="footerBrand">TechVision</h3>
+                            <p class="element-highlight" id="footerDesc">Building the future of web development with AI-powered tools and intuitive design.</p>
+                        </div>
+                        <div class="footer-links">
+                            <h4>Product</h4>
+                            <ul>
+                                <li><a href="#">Features</a></li>
+                                <li><a href="#">Pricing</a></li>
+                                <li><a href="#">Templates</a></li>
+                                <li><a href="#">API</a></li>
+                            </ul>
+                        </div>
+                        <div class="footer-links">
+                            <h4>Company</h4>
+                            <ul>
+                                <li><a href="#">About</a></li>
+                                <li><a href="#">Blog</a></li>
+                                <li><a href="#">Careers</a></li>
+                                <li><a href="#">Contact</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="footer-bottom">
+                        <p class="element-highlight" id="footerCopyright">© 2024 TechVision. All rights reserved.</p>
+                    </div>
+                </footer>
+            </div>
             </div>
         </div>
     </div>
 
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-XXXXXXXXXX'); // Replace with your GA4 ID
-    </script>
+    <!-- Voice Response Overlay -->
+    <div class="voice-response" id="voiceResponse"></div>
 
-    <script src="config.js"></script>
-    <script src="demo.js"></script>
+    <script src="assets/js/voice-recognition.js"></script>
+    <script src="assets/js/animations.js"></script>
+    <script src="assets/js/demo.js"></script>
 </body>
 </html>
